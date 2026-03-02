@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Скрипт заселения (Walk-in) — версия для телефона</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <style>
+    :root { --tap-radius: 16px; }
+    body { background: #f6f7f9; }
+    .app-header {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(246,247,249,.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e6e8ee;
+    }
+    .step-card {
+      border: 0; border-radius: 18px;
+      box-shadow: 0 6px 22px rgba(20,20,20,.06);
+      overflow: hidden;
+    }
+    .step-btn {
+      text-align: left; width: 100%;
+      padding: 14px 14px;
+      background: white; border: 0;
+    }
+    .step-btn:active { transform: scale(.99); }
+    .badge-step {
+      font-variant-numeric: tabular-nums;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #eef2ff;
+      color: #2b3a67;
+      font-weight: 600;
+      margin-right: 10px;
+      flex: 0 0 auto;
+    }
+    .step-title { font-weight: 700; line-height: 1.15; }
+    .step-subtitle { color: #6c757d; font-size: .9rem; margin-top: 2px; }
+
+    .phrase {
+      border-radius: var(--tap-radius);
+      background: #ffffff;
+      border: 1px solid #eef0f5;
+      padding: 12px 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .phrase:hover { border-color: #e0e4ee; }
+    .phrase .en { font-weight: 600; line-height: 1.2; }
+    .phrase .hint { color: #8a93a2; font-size: .82rem; margin-top: 6px; }
+    .phrase .ru {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e6e8ee;
+      color: #212529;
+    }
+    .phrase.open .ru { display: block; }
+    body.show-all-ru .phrase .ru { display: block; }
+    body.show-all-ru .phrase .hint { display: none; }
+
+    .note {
+      display: none;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fff7e6;
+      border: 1px solid #ffe8b8;
+      color: #6b4e00;
+      font-size: .92rem;
+    }
+    body.show-notes .note { display: block; }
+
+    .tiny { font-size: .85rem; }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: #f0f2f6;
+      border: 1px solid #e3e6ef;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <div class="container py-3">
+      <div class="d-flex align-items-start justify-content-between gap-3">
+        <div>
+          <div class="h5 mb-1">Скрипт заселения (Walk-in)</div>
+          <div class="text-muted tiny">Нажми на фразу — откроется перевод. Поиск работает по английскому и русскому.</div>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <input id="search" class="form-control form-control-lg" type="search" placeholder="Поиск (reservation / passport / завтрак)..." />
+      </div>
+
+      <div class="d-flex gap-2 mt-3 flex-wrap">
+        <button id="toggleRu" class="btn btn-outline-primary btn-sm">Показать весь перевод</button>
+        <button id="toggleNotes" class="btn btn-outline-warning btn-sm">Показать примечания (для преподавателя)</button>
+        <button id="collapseAll" class="btn btn-outline-secondary btn-sm">Свернуть всё</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-3">
+    <div id="list" class="d-grid gap-3"></div>
+    <div class="text-center text-muted tiny py-4">
+      Подсказка: на ПК можно использовать <span class="kbd">Ctrl</span> + <span class="kbd">F</span>, а на телефоне — строку поиска.
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT = [{"step": 1, "action_en": "Greeting", "action_ru": "Приветствие гостя", "phrases": [{"en": "Good morning / afternoon / evening! How can I help you?", "ru": "Доброе утро / день / вечер! Чем могу помочь?"}], "notes": "Make eye contact and greet when the guest is within ~2 meters."}, {"step": 2, "action_en": "Ask the guest’s name", "action_ru": "Узнать имя гостя", "phrases": [{"en": "May I have your name, please?", "ru": "Как я могу к вам обращаться?"}], "notes": "Use the guest’s name 2–3 times during the conversation."}, {"step": 3, "action_en": "Check if there is a reservation", "action_ru": "Уточнить наличие брони", "phrases": [{"en": "Do you have a reservation?", "ru": "У вас есть бронь? / Вы бронировали заранее?"}], "notes": ""}, {"step": 4, "action_en": "Clarify dates and room request", "action_ru": "Уточнить запрос (даты, категория номера)", "phrases": [{"en": "What dates are you looking for?", "ru": "На какие даты вы планируете проживание?"}, {"en": "How many nights will you be staying?", "ru": "На сколько дней (ночей) вы планируете остаться?"}, {"en": "What room category do you prefer?", "ru": "Какую категорию номера вы предпочитаете?"}], "notes": "Check availability of rooms for the requested dates."}, {"step": 5, "action_en": "Ask about special requests", "action_ru": "Уточнить особые пожелания", "phrases": [{"en": "Do you have any special requests? (e.g., a quiet room, a view)", "ru": "Будут ли у вас какие-то пожелания? (например, тихий номер, вид из окна)"}], "notes": "Record requests in the comment/notes field (if your system has it)."}, {"step": 6, "action_en": "Offer available options", "action_ru": "Предложить варианты", "phrases": [{"en": "I can offer you the following options for those dates: …", "ru": "На запрашиваемые вами даты могу предложить вам следующие варианты: …"}, {"en": "This room includes … (brief key features).", "ru": "В этом номере есть … (кратко: главное, что важно гостю)."}], "notes": "Describe the room briefly and highlight the most valuable features."}, {"step": 7, "action_en": "Ask about meal plans / packages", "action_ru": "Уточнить питание/пакеты", "phrases": [{"en": "Would you like to include breakfast (or another meal plan) in your stay?", "ru": "Нужно ли включить завтрак (или другой пакет питания) в проживание?"}], "notes": "If the guest chooses a package, add it in the system."}, {"step": 8, "action_en": "Confirm total price", "action_ru": "Озвучить общую стоимость", "phrases": [{"en": "The total cost for ___ nights is ___, including ___.", "ru": "Стоимость проживания за ___ ночей составит ___, включая ___."}], "notes": "Use the system’s calculation (booking/rate screen) to avoid mistakes."}, {"step": 9, "action_en": "Confirm booking details", "action_ru": "Сверить детали", "phrases": [{"en": "Let me confirm the details: room type ___, dates ___ to ___, ___ guests. Is that correct?", "ru": "Давайте уточним детали: номер ___, даты с ___ по ___, гостей ___ . Всё верно?"}], "notes": ""}, {"step": 10, "action_en": "Request documents", "action_ru": "Попросить документы", "phrases": [{"en": "May I see your passport (and visa / migration card, if applicable), please?", "ru": "Будьте добры, ваш паспорт (и миграционную карту/визу при необходимости)."}], "notes": "Collect documents for all guests. For children, follow your local rules."}, {"step": 11, "action_en": "Ask permission to make copies", "action_ru": "Спросить разрешение на копии", "phrases": [{"en": "May I make a copy of your documents, please?", "ru": "Могу ли я снять копии ваших документов?"}], "notes": ""}, {"step": 12, "action_en": "Return documents", "action_ru": "Вернуть документы", "phrases": [{"en": "Here are your documents.", "ru": "Будьте добры, ваши документы."}], "notes": "While copying/processing, keep the guest engaged (small talk or explain next steps)."}, {"step": 13, "action_en": "Personal data consent (if required)", "action_ru": "Согласие на обработку данных", "phrases": [{"en": "Please sign this consent form for personal data processing.", "ru": "Заполните, пожалуйста, согласие на обработку персональных данных."}], "notes": "This step depends on your hotel’s policy and local requirements."}, {"step": 14, "action_en": "Registration card", "action_ru": "Регистрационная карта", "phrases": [{"en": "Please fill in the registration card. If you have any questions, I can help.", "ru": "Заполните, пожалуйста, регистрационную карту. Если будут вопросы — я помогу."}], "notes": "Explain clearly what fields to fill in."}, {"step": 15, "action_en": "Payment / guarantee method", "action_ru": "Способ оплаты / гарантия", "phrases": [{"en": "How would you like to pay? Card or cash?", "ru": "Как вам удобнее оплатить: картой или наличными?"}, {"en": "Would you like to make a deposit (or pre-authorisation) now?", "ru": "Хотите внести депозит (или предавторизацию) сейчас?"}], "notes": "Use the correct terms for your property (deposit, prepayment, guarantee, etc.)."}, {"step": 16, "action_en": "Check room readiness", "action_ru": "Проверить готовность номера", "phrases": [{"en": "Your room is ready.", "ru": "Ваш номер готов к заселению."}, {"en": "Your room is not ready yet. Please wait a few minutes.", "ru": "Ваш номер ещё не готов. Пожалуйста, ожидайте несколько минут."}], "notes": "Check the housekeeping/room status screen before confirming."}, {"step": 17, "action_en": "Give the key and guest card", "action_ru": "Выдать ключ и карту гостя", "phrases": [{"en": "Here is your key card and your guest card.", "ru": "Вот ваш ключ и карта гостя."}], "notes": "Encode the key card and fill/print the guest card if required."}, {"step": 18, "action_en": "Explain how to get to the room", "action_ru": "Объяснить месторасположение номера", "phrases": [{"en": "Your room is on the 2nd floor, on the left after the elevator.", "ru": "Ваш номер находится на 2 этаже, слева от лифта."}], "notes": "Give directions without announcing the room number loudly."}, {"step": 19, "action_en": "Breakfast information", "action_ru": "Сообщить про завтрак", "phrases": [{"en": "Breakfast is served in the restaurant from 7:00 to 10:00.", "ru": "Завтрак проходит в ресторане с 7:00 до 10:00."}], "notes": "Adjust times and location to your property."}, {"step": 20, "action_en": "Other hotel services", "action_ru": "Сообщить про другие услуги", "phrases": [{"en": "Just to let you know, we have … (gym / sauna / room service / Wi‑Fi).", "ru": "Также хочу сообщить: у нас есть … (спортзал / сауна / рум‑сервис / Wi‑Fi)."}], "notes": "Mention only the most relevant services; don’t overload the guest."}, {"step": 21, "action_en": "Reception availability", "action_ru": "Сказать про круглосуточную стойку", "phrases": [{"en": "The reception desk is open 24/7. Please contact us anytime if you need help.", "ru": "Стойка размещения работает круглосуточно. Обращайтесь в любое время, если нужна помощь."}], "notes": ""}, {"step": 22, "action_en": "Offer help with luggage", "action_ru": "Помощь с багажом", "phrases": [{"en": "Would you like help with your luggage?", "ru": "Вам нужна помощь с багажом?"}], "notes": "If yes, contact the bell service or record the request."}, {"step": 23, "action_en": "Final assistance", "action_ru": "Уточнить, нужна ли ещё помощь", "phrases": [{"en": "Is there anything else I can help you with?", "ru": "Я могу вам ещё чем‑то помочь?"}], "notes": ""}, {"step": 24, "action_en": "Farewell", "action_ru": "Прощание", "phrases": [{"en": "Thank you for choosing our hotel. Enjoy your stay!", "ru": "Спасибо, что выбрали наш отель. Приятного отдыха!"}], "notes": ""}];
+
+    const elList = document.getElementById('list');
+    const elSearch = document.getElementById('search');
+    const btnRu = document.getElementById('toggleRu');
+    const btnNotes = document.getElementById('toggleNotes');
+    const btnCollapse = document.getElementById('collapseAll');
+
+    function normalize(s) {
+      return (s || '').toString().toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function escapeHtml(str) {
+      return (str ?? '').toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\n/g, '<br>');
+    }
+
+    function render(items) {
+      elList.innerHTML = '';
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'step-card';
+
+        const stepId = `step-${item.step}`;
+
+        card.innerHTML = `
+          <button class="step-btn" type="button" data-bs-toggle="collapse" data-bs-target="#${stepId}" aria-expanded="false" aria-controls="${stepId}">
+            <div class="d-flex align-items-start">
+              <div class="badge-step">#${item.step}</div>
+              <div class="flex-grow-1">
+                <div class="step-title">${escapeHtml(item.action_en)}</div>
+                <div class="step-subtitle">${escapeHtml(item.action_ru)}</div>
+              </div>
+            </div>
+          </button>
+          <div id="${stepId}" class="collapse">
+            <div class="p-3 pt-0">
+              <div class="mt-2">
+                ${item.phrases.map(p => `
+                  <div class="phrase" role="button" tabindex="0">
+                    <div class="en">${escapeHtml(p.en)}</div>
+                    <div class="hint">Нажми, чтобы увидеть перевод</div>
+                    <div class="ru">${escapeHtml(p.ru)}</div>
+                  </div>
+                `).join('')}
+                <div class="note">${escapeHtml(item.notes || '')}</div>
+              </div>
+            </div>
+          </div>
+        `;
+        elList.appendChild(card);
+      });
+
+      // phrase toggle
+      elList.querySelectorAll('.phrase').forEach(ph => {
+        ph.addEventListener('click', () => ph.classList.toggle('open'));
+        ph.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            ph.classList.toggle('open');
+          }
+        });
+      });
+    }
+
+    function applyFilter() {
+      const q = normalize(elSearch.value);
+      if (!q) {
+        render(SCRIPT);
+        return;
+      }
+      const filtered = SCRIPT.filter(item => {
+        const hay = normalize(
+          item.action_en + ' ' + item.action_ru + ' ' + (item.notes||'') + ' ' +
+          item.phrases.map(p => p.en + ' ' + p.ru).join(' ')
+        );
+        return hay.includes(q);
+      });
+      render(filtered);
+    }
+
+    btnRu.addEventListener('click', () => {
+      document.body.classList.toggle('show-all-ru');
+      btnRu.textContent = document.body.classList.contains('show-all-ru')
+        ? 'Скрыть весь перевод'
+        : 'Показать весь перевод';
+    });
+
+    btnNotes.addEventListener('click', () => {
+      document.body.classList.toggle('show-notes');
+      btnNotes.textContent = document.body.classList.contains('show-notes')
+        ? 'Скрыть примечания'
+        : 'Показать примечания (для преподавателя)';
+    });
+
+    btnCollapse.addEventListener('click', () => {
+      document.querySelectorAll('.collapse.show').forEach(el => {
+        const inst = bootstrap.Collapse.getOrCreateInstance(el, {toggle:false});
+        inst.hide();
+      });
+      document.querySelectorAll('.phrase.open').forEach(p => p.classList.remove('open'));
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+
+    elSearch.addEventListener('input', applyFilter);
+
+    // Initial render
+    render(SCRIPT);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
