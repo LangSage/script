@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Script</title>
+  <style>
+    :root {
+      --pad: 12px;
+      --radius: 14px;
+      --border: 1px solid rgba(0,0,0,.14);
+      --muted: rgba(0,0,0,.62);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 56px 10px 10px; /* top padding prevents overlap with fixed button */
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fff;
+      color: #111;
+    }
+    .list { display:flex; flex-direction:column; gap:10px; padding-bottom: 76px; }
+
+    details {
+      border: var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      overflow: hidden;
+    }
+    summary {
+      list-style: none;
+      padding: var(--pad);
+      font-size: 18px;
+      line-height: 1.25;
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    summary::-webkit-details-marker { display:none; }
+    .num {
+      flex: 0 0 auto;
+      width: 34px;
+      font-weight: 700;
+      color: #111;
+    }
+    .phrase { flex: 1 1 auto; }
+    .pre { white-space: pre-wrap; }
+
+    .inside {
+      border-top: var(--border);
+      padding: var(--pad);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .row {
+      display:grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      align-items:start;
+    }
+    .k {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .v {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    /* Floating menu button (doesn't take space) */
+    .fab {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      border: var(--border);
+      background: #fff;
+      font-size: 22px;
+      line-height: 1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.10);
+      cursor:pointer;
+    }
+
+    /* Overlay sheet */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+    }
+    .sheet {
+      width: 100%;
+      max-width: 720px;
+      border-radius: 22px;
+      background:#fff;
+      border: var(--border);
+      box-shadow: 0 14px 40px rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .sheetTop {
+      display:flex;
+      gap:10px;
+      padding: 12px;
+      border-bottom: var(--border);
+      align-items:center;
+    }
+    .search {
+      flex: 1;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: var(--border);
+      font-size: 16px;
+      outline: none;
+    }
+    .close {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: var(--border);
+      background:#fff;
+      font-size: 16px;
+      cursor:pointer;
+    }
+    .results {
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .result {
+      padding: 12px;
+      border-bottom: var(--border);
+      cursor:pointer;
+      white-space: pre-wrap;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .result:last-child { border-bottom: none; }
+
+    @media (max-width: 420px) {
+      .row { grid-template-columns: 78px 1fr; }
+      summary { font-size: 17px; }
+      .v { font-size: 15.5px; }
+    }
+    .nav-home {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      background: #007acc;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      z-index: 1000;
+    }
+    .nav-home:hover { background: #005fa3; }
+  </style>
+</head>
+<body>
+  <a class="nav-home" href="index.html">На главную</a>
+  <div class="list" id="list">
+    
+    <details id="s1">
+      <summary><span class="num">1.</span><span class="phrase pre">Good morning/ afternoon/evening. How can I help you?
+
+Гость: I would like to check in</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Приветствие гостя.</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Доброе утро/день/вечер. Чем могу помочь?
+
+Гость: Я хотел(а) бы заселиться.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Устанавливаем с гостем зрительный контакт, когда гость подойдет ближе 2х метров, приветствуем.</div></div>
+      </div>
+    </details>
+    
+    <details id="s2">
+      <summary><span class="num">2.</span><span class="phrase pre">How can I call you?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Узнает имя гостя</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Как я могу к вам обращаться?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>К гостю обращаемся в течение беседы 2-3 раза по имени.</div></div>
+      </div>
+    </details>
+    
+    <details id="s3">
+      <summary><span class="num">3.</span><span class="phrase pre">Do you have a reservation?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Уточняет наличие брони</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>У вас есть бронирование?</div></div>
+      </div>
+    </details>
+    
+    <details id="s4">
+      <summary><span class="num">4.</span><span class="phrase pre">Имя гостя, what dates are you interested in? 
+How many people will live? 
+Have you already decided on the category of the room?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Уточняет у гостя запрос (категория номера, даты, количество гостей)</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Имя гостя, на какие даты вы заинтересованы?
+Сколько человек будет проживать?
+Вы уже определились с категорией номера?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Проверяет наличие свободных номеров</div></div>
+      </div>
+    </details>
+    
+    <details id="s5">
+      <summary><span class="num">5.</span><span class="phrase pre">Do you have any special requests for the room? / Any wishes?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Уточняет, есть ли у гостя особые пожелания</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Есть ли у вас особые пожелания по номеру? / Какие-то пожелания?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Например, вид из окна, где максимально спокойно и т.д.</div></div>
+      </div>
+    </details>
+    
+    <details id="s6">
+      <summary><span class="num">6.</span><span class="phrase pre">I understand you. For the dates you requested, I can offer a standard, comfort and lux. The cost of the standart room is 2700, comfort room is 3900 and lux is 4800 rubles per night.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Предлагает варианты на интересующие даты</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Понимаю. На запрошенные вами даты я могу предложить standard, comfort и lux. Стоимость standard — 2700, comfort — 3900, lux — 4800 рублей за ночь.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Также необходимо кратко описать номер, акцентируя внимание на преимуществах номера. Цены и описание номеров смотреть в программе.</div></div>
+      </div>
+    </details>
+    
+    <details id="s7">
+      <summary><span class="num">7.</span><span class="phrase pre">Do you need to include food packages in your stay?  Which one?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Уточняет необходимость включения в проживание пакетов питания (ВВ, НВ, FВ)</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Хотите включить питание в проживание? Какой пакет?</div></div>
+      </div>
+    </details>
+    
+    <details id="s8">
+      <summary><span class="num">8.</span><span class="phrase pre">8. Корректно регистрирует включенные в проживание пакеты питания (ВВ, НВ, FВ)</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Корректно регистрирует включенные в проживание пакеты питания (ВВ, НВ, FВ)</div></div>
+      </div>
+    </details>
+    
+    <details id="s9">
+      <summary><span class="num">9.</span><span class="phrase pre">The total cost for the duration of your stay for ____ nights will be _____ rubles. Are you satisfied with your option? / Do you agree?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Верно называет общую стоимость проживания с учетом пакетов питания</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Общая стоимость проживания за ____ ночей составит _____ рублей. Вас устраивает этот вариант? / Вы согласны?</div></div>
+      </div>
+    </details>
+    
+    <details id="s10">
+      <summary><span class="num">10.</span><span class="phrase pre">Please, your phone number and email address.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Корректно записывает ФИ гостя, контактный телефон и адрес электронной почты</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Пожалуйста, ваш номер телефона и адрес электронной почты.</div></div>
+      </div>
+    </details>
+    
+    <details id="s11">
+      <summary><span class="num">11.</span><span class="phrase pre">So, (имя гостя) let's clarify the details: a room of the «Lux» category was booked for Ivanov Ivan Ivanovich from March 20 to March 28 for two people with a «Full Board» meal package Is that right?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Сверяет полученные детали бронирования (тип номера, тип кровати, на чье имя, даты, кол-во гостей, питания, время заезда)</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Итак, (имя гостя), давайте уточним детали: номер категории «Lux» забронирован на Иванова Ивана Ивановича с 20 марта по 28 марта на двоих с пакетом питания «Full Board». Всё верно?</div></div>
+      </div>
+    </details>
+    
+    <details id="s12">
+      <summary><span class="num">12.</span><span class="phrase pre">Can I see your passport, migration card and VISA?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Просит предоставить паспорт и миграционную карту</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Могу я увидеть ваш паспорт, миграционную карту и визу?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Документы нужны все проживающих, у детей до 14 лет нужны свидетельства о рождении</div></div>
+      </div>
+    </details>
+    
+    <details id="s13">
+      <summary><span class="num">13.</span><span class="phrase pre">Имя гостя, can I make copy of your documents?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Спрашивает, может ли сделать копию документов (паспорт , виза и миграционная карта)</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Имя гостя, могу я сделать копию ваших документов?</div></div>
+      </div>
+    </details>
+    
+    <details id="s14">
+      <summary><span class="num">14.</span><span class="phrase pre">14. Делает копию необходимых данных паспорта (1 стр, виза) и миграционную карту</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Делает копию необходимых данных паспорта (1 стр, виза) и миграционную карту</div></div>
+      </div>
+    </details>
+    
+    <details id="s15">
+      <summary><span class="num">15.</span><span class="phrase pre">Here is your documents.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Возвращает паспорт и миграционную карту</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Вот ваши документы.</div></div>
+      </div>
+    </details>
+    
+    <details id="s16">
+      <summary><span class="num">16.</span><span class="phrase pre">Имя гостя, could you fill in the registration form, please. There are our hotel policies. Sign the form here, please. If you have any questions, feel free to ask me.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Корректно объясняет, как заполнить регистрационную форму и просит подписать</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Имя гостя, заполните, пожалуйста, регистрационную форму. Здесь указаны правила отеля. Подпишите форму здесь, пожалуйста. Если у вас есть вопросы, смело задавайте.</div></div>
+      </div>
+    </details>
+    
+    <details id="s17">
+      <summary><span class="num">17.</span><span class="phrase pre">How do you prefer to pay?
+Would you like to guarantee your additional services?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Уточняет у гостя, каким способом будут гарантировать оплату</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Как вам удобнее оплатить?
+Хотите гарантировать оплату дополнительных услуг?</div></div>
+      </div>
+    </details>
+    
+    <details id="s18">
+      <summary><span class="num">18.</span><span class="phrase pre">Your room is ready.
+
+Имя гостя, your room is not ready yet, please wait in the lounge area. We can offer you free tea or coffee.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Проверяет свободен ли номер и чистоту номера</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Ваш номер готов.
+
+Имя гостя, ваш номер ещё не готов, пожалуйста, подождите в зоне отдыха. Мы можем предложить вам бесплатный чай или кофе.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Открываем вкладку «Housekeeping report» и проверяем чистоту номера.
+Если номер еще готов, после оформления гостя, просим подождать его в зоне отдыха, предложив кофе/чай.</div></div>
+      </div>
+    </details>
+    
+    <details id="s19">
+      <summary><span class="num">19.</span><span class="phrase pre">Here is your key and guest card.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Отдает гостю ключ</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Вот ваш ключ и карта гостя.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Кодировать ключ и заполнить карту гостя, в которой указывается номер комнаты.</div></div>
+      </div>
+    </details>
+    
+    <details id="s20">
+      <summary><span class="num">20.</span><span class="phrase pre">Your room is on 2nd floor, on the left from the elevator/lift.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Информирует о месторасположении комнаты</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Ваш номер на 2-м этаже, слева от лифта.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Указывается расположение комнаты, не называя номера комнаты в целях безопасности. Если гость спрашивает номер комнаты, нужно показать номер в карте гостя.</div></div>
+      </div>
+    </details>
+    
+    <details id="s21">
+      <summary><span class="num">21.</span><span class="phrase pre">Breakfasts are served in the rooms from 7.00 until 10.00</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Информирует о расписании завтрака и расположении ресторана</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Завтрак подаётся с 7:00 до 10:00.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Эта фраза примерная, все зависит от отеля. Завтраки могут и до 15.30 проходить.</div></div>
+      </div>
+    </details>
+    
+    <details id="s22">
+      <summary><span class="num">22.</span><span class="phrase pre">Имя гостя, I would like to inform you that on the territory of our hotel there are additional services such as fitness, babysitting, swimming pool and much more. You can find more information on our website.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Информирует о других услугах отеля</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Имя гостя, хочу сообщить, что на территории нашего отеля есть дополнительные услуги: фитнес, услуги няни, бассейн и многое другое. Более подробную информацию вы можете найти на нашем сайте.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Если гость задает вопросы, администратор должен ответить на них подробно.</div></div>
+      </div>
+    </details>
+    
+    <details id="s23">
+      <summary><span class="num">23.</span><span class="phrase pre">The reception desk is open around the clock. Please feel free to ask me at any time or contact us by the phone in your room.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Сообщает гостю, что стойка размещения доступна 24 часа в сутки (или номер ресепшн)</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Стойка регистрации работает круглосуточно. Вы можете обратиться ко мне в любое время или связаться с нами по телефону в вашем номере.</div></div>
+      </div>
+    </details>
+    
+    <details id="s24">
+      <summary><span class="num">24.</span><span class="phrase pre">Имя гостя, do you need help with your luggage?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Спрашивает, нужна ли помощь с багажом</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Имя гостя, вам нужна помощь с багажом?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Если гость говорит, что помощь с багажом нужна, записываем на листочек.</div></div>
+      </div>
+    </details>
+    
+    <details id="s25">
+      <summary><span class="num">25.</span><span class="phrase pre">Can I do for you anything else?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Спрашивает, чем еще может помочь</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Могу я ещё чем-то помочь?</div></div>
+      </div>
+    </details>
+    
+    <details id="s26">
+      <summary><span class="num">26.</span><span class="phrase pre">Thank you for choosing our hotel. You are always welcome. Have a nice day!</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Прощается в соответствии со стандартом</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Спасибо, что выбрали наш отель. Мы всегда вам рады. Хорошего дня!</div></div>
+      </div>
+    </details>
+    
+  </div>
+
+  <button class="fab" id="fab" aria-label="menu">≡</button>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheetTop">
+        <input class="search" id="q" placeholder="Search" autocomplete="off" />
+        <button class="close" id="closeBtn">✕</button>
+      </div>
+      <div class="results" id="results"></div>
+    </div>
+  </div>
+
+  <script>
+    const items = [
+        {id:'s1', text:'Good morning/ afternoon/evening. How can I help you?\n\nГость: I would like to check in'},
+        {id:'s2', text:'How can I call you?'},
+        {id:'s3', text:'Do you have a reservation?'},
+        {id:'s4', text:'Имя гостя, what dates are you interested in? \nHow many people will live? \nHave you already decided on the category of the room?'},
+        {id:'s5', text:'Do you have any special requests for the room? / Any wishes?'},
+        {id:'s6', text:'I understand you. For the dates you requested, I can offer a standard, comfort and lux. The cost of the standart room is 2700, comfort room is 3900 and lux is 4800 rubles per night.'},
+        {id:'s7', text:'Do you need to include food packages in your stay?  Which one?'},
+        {id:'s8', text:'8. Корректно регистрирует включенные в проживание пакеты питания (ВВ, НВ, FВ)'},
+        {id:'s9', text:'The total cost for the duration of your stay for ____ nights will be _____ rubles. Are you satisfied with your option? / Do you agree?'},
+        {id:'s10', text:'Please, your phone number and email address.'},
+        {id:'s11', text:"So, (имя гостя) let's clarify the details: a room of the «Lux» category was booked for Ivanov Ivan Ivanovich from March 20 to March 28 for two people with a «Full Board» meal package Is that right?"},
+        {id:'s12', text:'Can I see your passport, migration card and VISA?'},
+        {id:'s13', text:'Имя гостя, can I make copy of your documents?'},
+        {id:'s14', text:'14. Делает копию необходимых данных паспорта (1 стр, виза) и миграционную карту'},
+        {id:'s15', text:'Here is your documents.'},
+        {id:'s16', text:'Имя гостя, could you fill in the registration form, please. There are our hotel policies. Sign the form here, please. If you have any questions, feel free to ask me.'},
+        {id:'s17', text:'How do you prefer to pay?\nWould you like to guarantee your additional services?'},
+        {id:'s18', text:'Your room is ready.\n\nИмя гостя, your room is not ready yet, please wait in the lounge area. We can offer you free tea or coffee.'},
+        {id:'s19', text:'Here is your key and guest card.'},
+        {id:'s20', text:'Your room is on 2nd floor, on the left from the elevator/lift.'},
+        {id:'s21', text:'Breakfasts are served in the rooms from 7.00 until 10.00'},
+        {id:'s22', text:'Имя гостя, I would like to inform you that on the territory of our hotel there are additional services such as fitness, babysitting, swimming pool and much more. You can find more information on our website.'},
+        {id:'s23', text:'The reception desk is open around the clock. Please feel free to ask me at any time or contact us by the phone in your room.'},
+        {id:'s24', text:'Имя гостя, do you need help with your luggage?'},
+        {id:'s25', text:'Can I do for you anything else?'},
+        {id:'s26', text:'Thank you for choosing our hotel. You are always welcome. Have a nice day!'}
+    ];
+
+    const overlay = document.getElementById('overlay');
+    const fab = document.getElementById('fab');
+    const closeBtn = document.getElementById('closeBtn');
+    const q = document.getElementById('q');
+    const results = document.getElementById('results');
+
+    function openOverlay(){
+      overlay.style.display = 'flex';
+      q.value = '';
+      render('');
+      setTimeout(()=>q.focus(), 50);
+    }
+    function closeOverlay(){ overlay.style.display = 'none'; }
+
+    fab.addEventListener('click', openOverlay);
+    closeBtn.addEventListener('click', closeOverlay);
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeOverlay(); });
+
+    function render(query){
+      const s = (query||'').trim().toLowerCase();
+      const filtered = !s ? items : items.filter(x => x.text.toLowerCase().includes(s));
+      results.innerHTML = filtered.map(x => `<div class="result" data-id="${x.id}">${x.text}</div>`).join('') || `<div class="result" style="opacity:.55">No matches</div>`;
+    }
+
+    q.addEventListener('input', ()=> render(q.value));
+    results.addEventListener('click', (e)=>{
+      const el = e.target.closest('.result');
+      if(!el) return;
+      const id = el.getAttribute('data-id');
+      closeOverlay();
+      const node = document.getElementById(id);
+      if(node){
+        node.open = true;
+        node.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+
+    // Compact: opening one closes others
+    const list = document.getElementById('list');
+    list.addEventListener('toggle', (e)=>{
+      const opened = e.target;
+      if(opened.tagName !== 'DETAILS' || !opened.open) return;
+      [...list.querySelectorAll('details')].forEach(d=>{ if(d!==opened) d.open=false; });
+    }, true);
+  </script>
+</body>
+</html>

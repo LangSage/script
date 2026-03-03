@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tourist info</title>
+  <style>
+    :root {
+      --pad: 12px;
+      --radius: 14px;
+      --border: 1px solid rgba(0,0,0,.14);
+      --muted: rgba(0,0,0,.62);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 56px 10px 10px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fff;
+      color: #111;
+    }
+    .list { display:flex; flex-direction:column; gap:10px; padding-bottom: 76px; }
+
+    details {
+      border: var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      overflow: hidden;
+    }
+    summary {
+      list-style: none;
+      padding: var(--pad);
+      font-size: 18px;
+      line-height: 1.25;
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    summary::-webkit-details-marker { display:none; }
+    .num {
+      flex: 0 0 auto;
+      width: 28px;
+      font-weight: 700;
+      color: #111;
+    }
+    .phrase { flex: 1 1 auto; }
+    .pre { white-space: pre-wrap; }
+
+    .inside {
+      border-top: var(--border);
+      padding: var(--pad);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .row {
+      display:grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      align-items:start;
+    }
+    .k {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .v {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .fab {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      border: var(--border);
+      background: #fff;
+      font-size: 22px;
+      line-height: 1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.10);
+      cursor:pointer;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+    }
+    .sheet {
+      width: 100%;
+      max-width: 720px;
+      border-radius: 22px;
+      background:#fff;
+      border: var(--border);
+      box-shadow: 0 14px 40px rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .sheetTop {
+      display:flex;
+      gap:10px;
+      padding: 12px;
+      border-bottom: var(--border);
+      align-items:center;
+    }
+    .search {
+      flex: 1;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: var(--border);
+      font-size: 16px;
+      outline: none;
+    }
+    .close {
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: var(--border);
+      background:#fff;
+      font-size: 16px;
+      cursor:pointer;
+    }
+    .results {
+      max-height: 60vh;
+      overflow:auto;
+    }
+    .result {
+      padding: 12px;
+      border-bottom: var(--border);
+      cursor:pointer;
+      white-space: pre-wrap;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .result:last-child { border-bottom: none; }
+
+    @media (max-width: 420px) {
+      .row { grid-template-columns: 78px 1fr; }
+      summary { font-size: 17px; }
+      .v { font-size: 15.5px; }
+    }
+    .nav-home {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      background: #007acc;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      z-index: 1000;
+    }
+    .nav-home:hover { background: #005fa3; }
+  </style>
+</head>
+<body>
+  <a class="nav-home" href="index.html">На главную</a>
+  <div class="list" id="list">
+    
+    <details id="s1">
+      <summary><span class="num">1</span><span class="phrase pre">Good morning/afternoon/evening, How can I help you?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Приветствие гостя</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Доброе утро/день/вечер. Чем могу помочь?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Устанавливается зрительный контакт с гостем, когда гость подойдет ближе 2х метров, приветствуем.</div></div>
+      </div>
+    </details>
+    
+    <details id="s2">
+      <summary><span class="num">2</span><span class="phrase pre">How can I call you?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Узнать имя гостя</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Как я могу к вам обращаться?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Улыбаемся глазами. К гостю обращаемся в течение беседы 2-3 раза по имени.</div></div>
+      </div>
+    </details>
+    
+    <details id="s3">
+      <summary><span class="num">3</span><span class="phrase pre">What would you like to see in our town?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Узнать, что именно интересует гостя</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Что вы хотели(а) бы посмотреть в нашем городе?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Рассказать не менее 3 вариантов для посещения</div></div>
+      </div>
+    </details>
+    
+    <details id="s4">
+      <summary><span class="num">4</span><span class="phrase pre">In our town you can visit (посетить – музеи,выставки и т.д.)/see…..</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Рассказать о местонахождении необходимых достопримечательностей</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>В нашем городе вы можете посетить (музеи, выставки и т.д.) / увидеть …</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Показать на карте, отметить местонахождение. Предложить забрать карту с собой</div></div>
+      </div>
+    </details>
+    
+    <details id="s5">
+      <summary><span class="num">5</span><span class="phrase pre">You can get to …. by bus or by taxi.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Рассказать о способах как туда добраться</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Вы можете добраться до … на автобусе или на такси.</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>При необходимости вызвать такси. Показать на карте местонахождение остановки общественного транспорта</div></div>
+      </div>
+    </details>
+    
+    <details id="s6">
+      <summary><span class="num">6</span><span class="phrase pre">Good morning/afternoon/evening Hotel «Seven Sky». Administrator _____. Our guest needs a taxi from our hotel to …..</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Вызов такси</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Доброе утро/день/вечер, отель «Seven Sky». Администратор _____. Нашему гостю нужно такси от нашего отеля до …</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Проинформировать гостя о марке машины и его номере. Примерное время подачи машины.</div></div>
+      </div>
+    </details>
+    
+    <details id="s7">
+      <summary><span class="num">7</span><span class="phrase pre">I inform you that the Reception desk is open 24 hours a day. If you have any questions, please feel free to ask me or call me from your room.</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Сообщает гостю, что стойка размещения доступна 24 часа в сутки.</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Сообщаю вам, что стойка регистрации работает круглосуточно. Если у вас есть вопросы, пожалуйста, обращайтесь ко мне или позвоните мне из вашего номера.</div></div>
+      </div>
+    </details>
+    
+    <details id="s8">
+      <summary><span class="num">8</span><span class="phrase pre">Can I help you with anything else?</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Спросить, можем ли помочь чем-то еще</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Могу ли я помочь вам чем-то ещё?</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Дать понять гостю, что мы всегда готовы помочь</div></div>
+      </div>
+    </details>
+    
+    <details id="s9">
+      <summary><span class="num">9</span><span class="phrase pre">Have a good day!</span></summary>
+      <div class="inside">
+        <div class='row'><div class='k'>Действия</div><div class='v'>Прощаемся с гостем</div></div><div class='row'><div class='k'>Перевод</div><div class='v pre'>Хорошего дня!</div></div><div class='row'><div class='k'>Примечания</div><div class='v pre'>Улыбаемся</div></div>
+      </div>
+    </details>
+    
+  </div>
+
+  <button class="fab" id="fab" aria-label="menu">≡</button>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheetTop">
+        <input class="search" id="q" placeholder="Search" autocomplete="off" />
+        <button class="close" id="closeBtn">✕</button>
+      </div>
+      <div class="results" id="results"></div>
+    </div>
+  </div>
+
+  <script>
+    const items = [
+        {id:'s1', text:'Good morning/afternoon/evening, How can I help you?'},
+        {id:'s2', text:'How can I call you?'},
+        {id:'s3', text:'What would you like to see in our town?'},
+        {id:'s4', text:'In our town you can visit (посетить – музеи,выставки и т.д.)/see…..'},
+        {id:'s5', text:'You can get to …. by bus or by taxi.'},
+        {id:'s6', text:'Good morning/afternoon/evening Hotel «Seven Sky». Administrator _____. Our guest needs a taxi from our hotel to …..'},
+        {id:'s7', text:'I inform you that the Reception desk is open 24 hours a day. If you have any questions, please feel free to ask me or call me from your room.'},
+        {id:'s8', text:'Can I help you with anything else?'},
+        {id:'s9', text:'Have a good day!'}
+    ];
+
+    const overlay = document.getElementById('overlay');
+    const fab = document.getElementById('fab');
+    const closeBtn = document.getElementById('closeBtn');
+    const q = document.getElementById('q');
+    const results = document.getElementById('results');
+
+    function openOverlay(){
+      overlay.style.display = 'flex';
+      q.value = '';
+      render('');
+      setTimeout(()=>q.focus(), 50);
+    }
+    function closeOverlay(){ overlay.style.display = 'none'; }
+
+    fab.addEventListener('click', openOverlay);
+    closeBtn.addEventListener('click', closeOverlay);
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeOverlay(); });
+
+    function render(query){
+      const s = (query||'').trim().toLowerCase();
+      const filtered = !s ? items : items.filter(x => x.text.toLowerCase().includes(s));
+      results.innerHTML = filtered.map(x => `<div class="result" data-id="${x.id}">${x.text}</div>`).join('') || `<div class="result" style="opacity:.55">No matches</div>`;
+    }
+
+    q.addEventListener('input', ()=> render(q.value));
+    results.addEventListener('click', (e)=>{
+      const el = e.target.closest('.result');
+      if(!el) return;
+      const id = el.getAttribute('data-id');
+      closeOverlay();
+      const node = document.getElementById(id);
+      if(node){
+        node.open = true;
+        node.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+
+    const list = document.getElementById('list');
+    list.addEventListener('toggle', (e)=>{
+      const opened = e.target;
+      if(opened.tagName !== 'DETAILS' || !opened.open) return;
+      [...list.querySelectorAll('details')].forEach(d=>{ if(d!==opened) d.open=false; });
+    }, true);
+  </script>
+</body>
+</html>

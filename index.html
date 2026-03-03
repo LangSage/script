@@ -2,298 +2,57 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Check-in phrases</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Главная страница скриптов</title>
   <style>
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: rgba(17,24,39,.10);
-      --shadow: 0 6px 18px rgba(17,24,39,.06);
-      --radius: 16px;
-    }
-    * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--text);
+      padding: 10px;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
+      background: #f9f9f9;
+      color: #111;
     }
-    .wrap {
-      padding: max(10px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+    h1 {
+      margin-top: 0;
     }
-    .item {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 14px 12px;
-      margin: 10px 0;
-      cursor: pointer;
-      user-select: none;
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
     }
-    .en {
-      font-size: 17px;
-      line-height: 1.25;
-      font-weight: 650;
-      letter-spacing: .1px;
-      padding-right: 18px;
-    }
-    .meta {
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .section {
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .09em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .chev {
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1;
-      flex: 0 0 auto;
-      transform: rotate(0deg);
-      transition: transform .18s ease;
-    }
-    .ru {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px dashed var(--border);
-      color: #111827;
-      font-size: 16px;
-      line-height: 1.35;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height .22s ease;
-    }
-    .ru p {
+    ul.card-list {
+      list-style: none;
+      padding: 0;
       margin: 0;
-      color: var(--text);
     }
-    .item.open .ru {
-      max-height: 260px; /* enough for 3-5 lines */
+    ul.card-list li {
+      background: #fff;
+      margin: 8px 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: background .2s;
     }
-    .item.open .chev {
-      transform: rotate(180deg);
+    ul.card-list li:hover {
+      background: #eaeaea;
     }
-
-    /* Floating menu */
-    .fab {
-      position: fixed;
-      right: 14px;
-      bottom: max(14px, env(safe-area-inset-bottom));
-      width: 52px;
-      height: 52px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      box-shadow: var(--shadow);
-      font-size: 22px;
-      cursor: pointer;
-    }
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(17,24,39,.35);
-      display: none;
-      align-items: flex-end;
-      padding: 12px 12px max(12px, env(safe-area-inset-bottom));
-    }
-    .overlay.show { display: flex; }
-    .panel {
-      width: 100%;
-      background: var(--card);
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      padding: 12px;
-    }
-    .row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .search {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 12px;
+    ul.card-list a {
+      color: #007acc;
+      font-weight: 500;
       font-size: 16px;
-      outline: none;
-      background: #fff;
-    }
-    .btn {
-      border: 1px solid var(--border);
-      background: #fff;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 16px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .chip {
-      border: 1px solid var(--border);
-      background: #fff;
-      border-radius: 999px;
-      padding: 10px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      color: var(--text);
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="wrap" id="wrap"></div>
-
-  <button class="fab" id="fab" aria-label="Menu">☰</button>
-
-  <div class="overlay" id="overlay" aria-hidden="true">
-    <div class="panel">
-      <div class="row">
-        <input id="q" class="search" inputmode="search" autocomplete="off" placeholder="Поиск / Search" />
-        <button class="btn" id="close" aria-label="Close">✕</button>
-      </div>
-      <div class="chips" id="chips"></div>
-    </div>
+  <div class="container">
+    <h1>Навигация по скриптам</h1>
+    <p>Выберите необходимый скрипт:</p>
+    <ul class="card-list">
+      <li><a href="walk_in.html">Заезд без бронирования (Walk-in)</a></li>
+      <li><a href="checkout_company.html">Выезд: гость от компании (Check-out)</a></li>
+      <li><a href="checkout_direct_guest.html">Выезд: прямой гость (Check-out)</a></li>
+      <li><a href="checkout_touragency.html">Выезд: гость от турфирмы (Check-out)</a></li>
+      <li><a href="tourist_info_script_strict_table_phone.html">Туристическая информация</a></li>
+    </ul>
   </div>
-
-  <script>
-    const ITEMS = [{"id": "greeting", "en": "Good morning / afternoon / evening. How can I help you?", "ru": "Доброе утро/день/вечер! Чем могу помочь?", "section": "Start", "order": 1}, {"id": "name", "en": "How may I address you?", "ru": "Как я могу к Вам обращаться?", "section": "Start", "order": 2}, {"id": "reservation", "en": "Do you have a reservation?", "ru": "У вас есть бронь? / Вы бронировали заранее? / У вас было предварительное бронирование?", "section": "Reservation", "order": 3}, {"id": "dates_people_category", "en": "What dates are you interested in? How many people will be staying? Have you chosen a room category?", "ru": "Скажите, пожалуйста, на сколько дне Вы планируете остановится? \nCколько человек будет проживать?\nOпределились ли Вы с категорий номера?", "section": "Reservation", "order": 4}, {"id": "special_requests", "en": "Do you have any special requests?", "ru": "Будут ли у вас какие-то пожелания?", "section": "Room", "order": 5}, {"id": "offer_options", "en": "For those dates, I can offer Standard, Comfort, or Lux. Standard is 3,200 rubles per night, Comfort is 4,200, and Lux is 5,000.", "ru": "На запрашиваемые Вами даты могу предложить Вам номер категории «Комфорт» за 4200 рублей за ночь, «Люкс» 5000 рублей за ночь и «Стандарт» за 3200 рублей за ночь.", "section": "Room", "order": 6}, {"id": "meal_plan", "en": "Would you like to include a meal package in your stay? Which one?", "ru": "Нужно в Ваше проживание включать пакеты питания? Какой именно?", "section": "Meals", "order": 7}, {"id": "total_cost", "en": "The total cost for ____ nights is ____ rubles. Does that work for you?", "ru": "Стоимость Вашего проживания за ___ ночей составит ____ рублей. Вас все устраивает?", "section": "Price", "order": 9}, {"id": "confirm_details", "en": "So, [Guest name], let’s confirm the details: a Lux room from March 20 to March 28 for two people with a Full Board meal package. Is that correct?", "ru": "Итак, (имя гостя) уточним детали: забронирован номер категории «Люкс» на Иванова Ивана Ивановича с 20 по 28 марта на двух персон с пакетом питания «Полный пансион» Все верно?", "section": "Confirm", "order": 10}, {"id": "documents_request", "en": "May I see your passports, migration cards, and visas, please?", "ru": "Будьте добры Ваши паспорта и миграционные карты и визы.", "section": "Documents", "order": 11}, {"id": "copy_documents", "en": "May I make a copy of your documents?", "ru": "Имя гостя, можно ли снять копии ваших документов?", "section": "Documents", "order": 12}, {"id": "return_documents", "en": "Here are your documents.", "ru": "Будьте добры, Ваши документы.", "section": "Documents", "order": 15}, {"id": "consent_personal_data", "en": "Please, fill in the consent to personal data processing.", "ru": "Заполните, пожалуйста, согласие на обработку персональных данных.", "section": "Documents", "order": 15.5}, {"id": "registration_card", "en": "Could you please fill in this registration card? Here are our hotel policies. Please sign here. If you have any questions, feel free to ask.", "ru": "Заполните, пожалуйста регистрационную карту, ознакомьтесь с правилами проживания и распишитесь здесь. Если возникнут вопросы обращайтесь.", "section": "Documents", "order": 16}, {"id": "contacts", "en": "May I have your phone number and email address, please?", "ru": "Пожалуйста, продиктуйте Ваш номер телефона и адрес электронной почты.", "section": "Contacts", "order": 16.5}, {"id": "payment", "en": "How would you like to pay? Would you like to leave a deposit for additional services?", "ru": "Как вам удобно оплатить? Хотите оставить депозит/гарантию на дополнительные услуги?", "section": "Payment", "order": 17}, {"id": "room_ready", "en": "Your room is ready.", "ru": "Ваш номер готов к заселению.", "section": "Room", "order": 18}, {"id": "room_not_ready", "en": "I’m sorry, your room isn’t ready yet. Please wait a moment.", "ru": "Имя гостя, Ваш номер еще не готов, ожидайте, пожалуйста, в зоне отдыха. ай/кофе за счет отеля.", "section": "Room", "order": 18.1}, {"id": "key_card", "en": "Here is your key and guest card.", "ru": "Ваш ключ и карта гостя.", "section": "Key", "order": 19}, {"id": "room_location", "en": "Your room is on the 2nd floor, to the left of the lift.", "ru": "Ваш номер находится на 2 этаже, слева от лифта.", "section": "Info", "order": 20}, {"id": "breakfast", "en": "Breakfast is served in the “Chalet” restaurant on the 2nd floor from 7:00 to 10:00.", "ru": "Завтраки проходят в ресторане «Шале» на 2 этаже с 7.00 до 12.00.", "section": "Info", "order": 21}, {"id": "services", "en": "We also offer additional services (fitness, pool, babysitting, etc.). You can find more information on our website.", "ru": "Имя гостя, хочу Вас проинформировать, что в нашем отеле широкий ассортимент доп.услуг: единственный в Восточном Подмосковье бассейн, массаж и услуги няни. Более подробно можно ознакомится на нашем сайте или в информационной папке в номере.", "section": "Info", "order": 22}, {"id": "reception_247", "en": "The reception desk is open 24/7. You can contact us at any time by phone from your room.", "ru": "Если у Вас возникнут вопросы, стойка размещения работает 24 часа в сутки. Вы можете обратиться лично или связаться с нами по телефону.", "section": "Info", "order": 23}, {"id": "luggage_help", "en": "Do you need any help with your luggage?", "ru": "Имя гостя, Вам нужна помощь с багажом?", "section": "Help", "order": 24}, {"id": "anything_else", "en": "Is there anything else I can help you with?", "ru": "Я могу Вам еще чем-то помочь?", "section": "Help", "order": 25}, {"id": "farewell", "en": "Thank you for choosing our hotel. Have a nice day!", "ru": "Спасибо, что выбрали наш отель. Приятного отдыха!/ Хорошего дня!/ Приятного проживания!", "section": "End", "order": 26}];
-
-    const wrap = document.getElementById('wrap');
-    const overlay = document.getElementById('overlay');
-    const fab = document.getElementById('fab');
-    const closeBtn = document.getElementById('close');
-    const q = document.getElementById('q');
-    const chips = document.getElementById('chips');
-
-    let openId = null;
-
-    function escapeHtml(s) {
-      return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function render(list) {
-      wrap.innerHTML = '';
-      list.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.dataset.id = item.id;
-        div.dataset.section = item.section || '';
-        div.innerHTML = `
-          <div class="en">${escapeHtml(item.en)}</div>
-          <div class="meta">
-            <div class="section">${escapeHtml(item.section || '')}</div>
-            <div class="chev">▾</div>
-          </div>
-          <div class="ru"><p>${escapeHtml(item.ru)}</p></div>
-        `;
-        div.addEventListener('click', () => toggleItem(item.id));
-        div.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') toggleItem(item.id);
-        });
-        div.tabIndex = 0;
-        wrap.appendChild(div);
-      });
-    }
-
-    function toggleItem(id) {
-      // accordion: only one open at a time
-      const prev = openId;
-      if (prev && prev !== id) {
-        const prevEl = wrap.querySelector(`.item[data-id="${CSS.escape(prev)}"]`);
-        if (prevEl) prevEl.classList.remove('open');
-      }
-      const el = wrap.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
-      if (!el) return;
-
-      const isOpen = el.classList.contains('open');
-      if (isOpen) {
-        el.classList.remove('open');
-        openId = null;
-      } else {
-        el.classList.add('open');
-        openId = id;
-        // small scroll assist so RU is visible
-        setTimeout(() => {
-          el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }, 60);
-      }
-    }
-
-    function setOverlay(show) {
-      overlay.classList.toggle('show', show);
-      overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
-      if (show) {
-        q.focus();
-      } else {
-        q.blur();
-      }
-    }
-
-    function buildChips() {
-      const sections = Array.from(new Set(ITEMS.map(x => x.section).filter(Boolean)));
-      chips.innerHTML = '';
-      sections.forEach(sec => {
-        const b = document.createElement('button');
-        b.className = 'chip';
-        b.textContent = sec;
-        b.addEventListener('click', () => {
-          setOverlay(false);
-          // scroll to first item of that section
-          const first = wrap.querySelector(`.item[data-section="${CSS.escape(sec)}"]`);
-          if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-        chips.appendChild(b);
-      });
-    }
-
-    function applyFilter() {
-      const query = q.value.trim().toLowerCase();
-      if (!query) {
-        render(ITEMS);
-        openId = null;
-        return;
-      }
-      const filtered = ITEMS.filter(x =>
-        (x.en || '').toLowerCase().includes(query) ||
-        (x.ru || '').toLowerCase().includes(query)
-      );
-      render(filtered);
-      openId = null;
-    }
-
-    fab.addEventListener('click', () => setOverlay(true));
-    closeBtn.addEventListener('click', () => setOverlay(false));
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) setOverlay(false);
-    });
-    q.addEventListener('input', applyFilter);
-
-    buildChips();
-    render(ITEMS);
-  </script>
 </body>
 </html>
