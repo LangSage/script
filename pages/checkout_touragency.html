@@ -65,6 +65,14 @@
       border-radius: 22px;
       padding: 12px;
       margin-bottom: 12px;
+      transition: transform .24s ease, opacity .24s ease, box-shadow .24s ease;
+      will-change: transform;
+    }
+    .top.collapsed {
+      transform: translateY(calc(-100% - 14px));
+      opacity: .72;
+      box-shadow: none;
+      pointer-events: none;
     }
     .top-row {
       display: flex;
@@ -658,6 +666,39 @@ good morning\afternoon\evening, administrator (name), the hotel “7 sky”. our
       });
     });
 
+
+    function setupCollapsingTopBar() {
+      const topBar = document.querySelector('.top');
+      if (!topBar) return;
+      let lastY = window.scrollY || 0;
+      let ticking = false;
+
+      function updateTopBar() {
+        const y = window.scrollY || 0;
+        const diff = y - lastY;
+        if (y < 8) {
+          topBar.classList.remove('collapsed');
+        } else if (diff > 8) {
+          topBar.classList.add('collapsed');
+        } else if (diff < -8) {
+          topBar.classList.remove('collapsed');
+        }
+        lastY = y;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          ticking = true;
+          window.requestAnimationFrame(updateTopBar);
+        }
+      }, { passive: true });
+
+      ['focusin', 'touchstart'].forEach(evt => {
+        topBar.addEventListener(evt, () => topBar.classList.remove('collapsed'), { passive: true });
+      });
+    }
+
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
     function applyTheme(choice) {
       const picked = choice || localStorage.getItem('script_theme') || 'auto';
@@ -678,6 +719,7 @@ good morning\afternoon\evening, administrator (name), the hotel “7 sky”. our
     speedBtn.classList.add('active');
     audio.playbackRate = Number(savedSpeed);
     applyTheme();
+    setupCollapsingTopBar();
   </script>
 </body>
 </html>
