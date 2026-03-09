@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Выезд: гость от компании (Check-out)</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb;
+      --panel: rgba(255,255,255,.82);
+      --card: #ffffff;
+      --card-2: #f8faff;
+      --text: #151821;
+      --muted: #697385;
+      --line: rgba(20,24,33,.09);
+      --accent: #4f7cff;
+      --accent-2: #eaf0ff;
+      --accent-text: #1f4fd6;
+      --shadow: 0 10px 28px rgba(18, 28, 45, .08);
+      --toast: rgba(17,24,39,.92);
+      --toast-fg: #ffffff;
+    }
+    [data-theme="dark"] {
+      --bg: #0d1118;
+      --panel: rgba(17,23,34,.84);
+      --card: #121826;
+      --card-2: #161d2d;
+      --text: #eef2ff;
+      --muted: #a4aec3;
+      --line: rgba(255,255,255,.09);
+      --accent: #7da2ff;
+      --accent-2: rgba(125,162,255,.12);
+      --accent-text: #d8e3ff;
+      --shadow: 0 14px 34px rgba(0,0,0,.32);
+      --toast: rgba(240,244,255,.96);
+      --toast-fg: #0f1522;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(79,124,255,.12), transparent 22rem),
+        radial-gradient(circle at top right, rgba(111,214,255,.10), transparent 20rem),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    .wrap {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      padding: 14px 12px 38px;
+    }
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .top-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .back {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+      flex: 0 0 auto;
+    }
+    .titlebox {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .eyebrow {
+      margin: 0 0 2px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 4vw, 30px);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+    .count {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+    .seg {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .seg button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .seg button.active {
+      background: var(--accent);
+      border-color: transparent;
+      color: white;
+    }
+    [data-theme="dark"] .seg button.active { color: #0f1522; }
+    .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 15px;
+      font-size: 16px;
+      outline: none;
+    }
+    .search::placeholder { color: var(--muted); }
+    .cards {
+      display: grid;
+      gap: 12px;
+    }
+    .card {
+      background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px 14px 12px;
+    }
+    .num {
+      min-width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-2);
+      color: var(--accent-text);
+      font-weight: 800;
+      font-size: 15px;
+      align-self: start;
+    }
+    .phrase-hit {
+      min-width: 0;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 14px;
+      padding: 2px 0;
+    }
+    .phrase-hit:active { transform: translateY(1px); }
+    .phrase {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .word {
+      display: inline;
+      cursor: pointer;
+      border-radius: 10px;
+      padding: 0 .05em;
+      transition: background-color .16s ease, color .16s ease;
+    }
+    .word:hover, .word:active {
+      background: var(--accent-2);
+      color: var(--accent-text);
+    }
+    .playing {
+      background: var(--accent);
+      color: white !important;
+    }
+    [data-theme="dark"] .playing { color: #0f1522 !important; }
+    .toggle {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 14px;
+      min-width: 42px;
+      height: 42px;
+      font-size: 18px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      align-self: start;
+    }
+    .toggle.open {
+      background: var(--accent-2);
+      color: var(--accent-text);
+    }
+    .details {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding: 14px;
+      gap: 10px;
+    }
+    .details.open { display: grid; }
+    .row {
+      display: grid;
+      gap: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+    }
+    .label {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .value {
+      font-size: 15px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 8px;
+      font-size: 15px;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(18px);
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--toast);
+      color: var(--toast-fg);
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 60;
+      max-width: calc(100vw - 28px);
+      text-align: center;
+      box-shadow: 0 10px 22px rgba(0,0,0,.2);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @media (max-width: 560px) {
+      .wrap { padding: 10px 10px 30px; }
+      .top { border-radius: 18px; padding: 10px; }
+      .top-row { align-items: flex-start; }
+      .back { padding: 10px 11px; }
+      .card-head { grid-template-columns: auto 1fr auto; gap: 10px; padding: 12px; }
+      .num, .toggle { min-width: 38px; height: 38px; border-radius: 12px; }
+      .phrase { font-size: 17px; line-height: 1.42; }
+      .seg button { padding: 8px 11px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="top-row">
+        <a class="back" href="index.html">← Назад</a>
+        <div class="titlebox">
+          <p class="eyebrow">Scripts</p>
+          <h1>Выезд: гость от компании (Check-out)</h1>
+          <div class="count">16 phrases</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="seg" id="themeSeg">
+          <button type="button" data-theme-choice="auto">Auto</button>
+          <button type="button" data-theme-choice="light">Light</button>
+          <button type="button" data-theme-choice="dark">Dark</button>
+        </div>
+        <div class="seg" id="speedSeg">
+          <button type="button" data-speed="0.85">0.85×</button>
+          <button type="button" data-speed="1">1×</button>
+          <button type="button" data-speed="1.15">1.15×</button>
+          <button type="button" data-speed="1.3">1.3×</button>
+        </div>
+        <input id="searchInput" class="search" type="search" placeholder="Search phrase, translation, notes..." autocomplete="off" />
+      </div>
+    </div>
+
+    <main class="cards" id="cards">
+      
+        <article class="card" data-idx="1" data-search="good morning\afternoon\evening! administrator (name). how can i help you?
+действия приветствие гостя.
+перевод доброе утро\день\вечер! администратор (имя). чем могу помочь?">
+          <div class="card-head">
+            <div class="num">16</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="good">Good</span> <span class="word" data-word="morning">morning</span>\<span class="word" data-word="afternoon">afternoon</span>\<span class="word" data-word="evening">evening</span>! <span class="word" data-word="administrator">Administrator</span> (<span class="word" data-word="name">name</span>). <span class="word" data-word="how">How</span> <span class="word" data-word="can">can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="help">help</span> <span class="word" data-word="you">you</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Приветствие гостя.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Доброе утро\день\вечер! Администратор (имя). Чем могу помочь?</div></div></div>
+        </article>
+
+        <article class="card" data-idx="2" data-search="how can i call you?
+действия уточняем имя гостя.
+перевод как я могу к вам обращаться?">
+          <div class="card-head">
+            <div class="num">17</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="how">How</span> <span class="word" data-word="can">can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="call">call</span> <span class="word" data-word="you">you</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Уточняем имя гостя.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Как я могу к вам обращаться?</div></div></div>
+        </article>
+
+        <article class="card" data-idx="3" data-search="(name) tell me please the room number you lived in.
+действия проверяем в программе вкладку «departure»: имя, номер комнаты, даты проживания.
+перевод (имя) скажите, пожалуйста, номер комнаты, в которой вы проживали.
+примечания открыть вкладку «departure», нужно запомнить номер комнаты и определить прямой гость, корпоративный гость или гость от турагентства.">
+          <div class="card-head">
+            <div class="num">18</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase">(<span class="word" data-word="name">name</span>) <span class="word" data-word="tell">tell</span> <span class="word" data-word="me">me</span> <span class="word" data-word="please">please</span> <span class="word" data-word="the">the</span> <span class="word" data-word="room">room</span> <span class="word" data-word="number">number</span> <span class="word" data-word="you">you</span> <span class="word" data-word="lived">lived</span> <span class="word" data-word="in">in</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Проверяем в программе вкладку «departure»: имя, номер комнаты, даты проживания.</div></div><div class="row"><div class="label">Перевод</div><div class="value">(имя) скажите, пожалуйста, номер комнаты, в которой вы проживали.</div></div><div class="row"><div class="label">Примечания</div><div class="value">Открыть вкладку «departure», нужно запомнить номер комнаты и определить прямой гость, корпоративный гость или гость от турагентства.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="4" data-search="can i see the key of your room?
+действия забираем ключ от номера.
+перевод могу я увидеть ключ от вашего номера?">
+          <div class="card-head">
+            <div class="num">19</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="can">Can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="see">see</span> <span class="word" data-word="the">the</span> <span class="word" data-word="key">key</span> <span class="word" data-word="of">of</span> <span class="word" data-word="your">your</span> <span class="word" data-word="room">room</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Забираем ключ от номера.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Могу я увидеть ключ от вашего номера?</div></div></div>
+        </article>
+
+        <article class="card" data-idx="5" data-search="you lived from the company “...” in room category “...” from ... till ... all right?
+действия проговариваем детали проживания.
+перевод вы проживали от компании «…» в номере категории «…» с … по … всё верно?">
+          <div class="card-head">
+            <div class="num">20</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="you">You</span> <span class="word" data-word="lived">lived</span> <span class="word" data-word="from">from</span> <span class="word" data-word="the">the</span> <span class="word" data-word="company">company</span> “...” <span class="word" data-word="in">in</span> <span class="word" data-word="room">room</span> <span class="word" data-word="category">category</span> “...” <span class="word" data-word="from">from</span> ... <span class="word" data-word="till">till</span> ... <span class="word" data-word="all">All</span> <span class="word" data-word="right">right</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Проговариваем детали проживания.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Вы проживали от компании «…» в номере категории «…» с … по … Всё верно?</div></div></div>
+        </article>
+
+        <article class="card" data-idx="6" data-search="21. у гостя от компании нужно спросить: «нужно ли разделять счет» и составить счет за проживание отдельно и за доп.услуги  - отдельно.
+действия у гостя от компании нужно спросить: «нужно ли разделять счет» и составить счет за проживание отдельно и за доп.услуги  - отдельно.">
+          <div class="card-head">
+            <div class="num">21</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="21">21</span>. У гостя от компании нужно спросить: «Нужно ли разделять счет» и составить счет за проживание отдельно и за доп.услуги  - отдельно.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">У гостя от компании нужно спросить: «Нужно ли разделять счет» и составить счет за проживание отдельно и за доп.услуги  - отдельно.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="7" data-search="(name) tell me please did you use a mini-bar?
+
+there are your bills. check it and put your signature here, please
+действия составить ознакомительные счета за проживание и доп.услуги, уточняя, чем пользовался гость
+перевод (имя) скажите, пожалуйста, вы пользовались мини-баром?
+
+вот ваши счета. проверьте, пожалуйста, и поставьте подпись здесь.
+примечания счет за проживание убираем в профайл гостя, а за доп. услуги берем оплату.">
+          <div class="card-head">
+            <div class="num">22</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase">(<span class="word" data-word="name">name</span>) <span class="word" data-word="tell">tell</span> <span class="word" data-word="me">me</span> <span class="word" data-word="please">please</span> <span class="word" data-word="did">did</span> <span class="word" data-word="you">you</span> <span class="word" data-word="use">use</span> <span class="word" data-word="a">a</span> <span class="word" data-word="mini">mini</span>-<span class="word" data-word="bar">bar</span>?
+
+<span class="word" data-word="there">There</span> <span class="word" data-word="are">are</span> <span class="word" data-word="your">your</span> <span class="word" data-word="bills">bills</span>. <span class="word" data-word="check">Check</span> <span class="word" data-word="it">it</span> <span class="word" data-word="and">and</span> <span class="word" data-word="put">put</span> <span class="word" data-word="your">your</span> <span class="word" data-word="signature">signature</span> <span class="word" data-word="here">here</span>, <span class="word" data-word="please">please</span></div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Составить ознакомительные счета за проживание и доп.услуги, уточняя, чем пользовался гость</div></div><div class="row"><div class="label">Перевод</div><div class="value">(имя) скажите, пожалуйста, вы пользовались мини-баром?
+
+Вот ваши счета. Проверьте, пожалуйста, и поставьте подпись здесь.</div></div><div class="row"><div class="label">Примечания</div><div class="value">Счет за проживание убираем в профайл гостя, а за доп. услуги берем оплату.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="8" data-search="how would you like to pay? cash or credit card?
+действия уточняем каким способом будет производиться оплата.
+перевод как вы хотели бы оплатить? наличными или картой?
+примечания если гость оплачиваем картой, предлагаем терминал. карту гостя на руки можно взять только в случае необходимости помощи.">
+          <div class="card-head">
+            <div class="num">23</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="how">How</span> <span class="word" data-word="would">would</span> <span class="word" data-word="you">you</span> <span class="word" data-word="like">like</span> <span class="word" data-word="to">to</span> <span class="word" data-word="pay">pay</span>? <span class="word" data-word="cash">Cash</span> <span class="word" data-word="or">or</span> <span class="word" data-word="credit">credit</span> <span class="word" data-word="card">card</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Уточняем каким способом будет производиться оплата.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Как вы хотели бы оплатить? Наличными или картой?</div></div><div class="row"><div class="label">Примечания</div><div class="value">Если гость оплачиваем картой, предлагаем терминал. Карту гостя на руки можно взять только в случае необходимости помощи.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="9" data-search="(name) how was your stay? could you fill in guest questionnaire please.
+
+thank you, you help us to become better.
+действия после оплаты гостем составляем обнуленный счет за доп.услуги. кладем его в конверт и прикрепляем чек.
+ пока все это выполняем, необходимо у гостя узнать, как прошло его проживание и дать анкету для заполнения, а после заполнения поблагодарить.
+перевод (имя) как прошло ваше проживание? не могли бы вы заполнить анкету гостя, пожалуйста.
+
+спасибо, вы помогаете нам становиться лучше.
+примечания настаивать на заполнение гостем анкеты не стоит, он должен выполнить это добровольно.">
+          <div class="card-head">
+            <div class="num">24</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase">(<span class="word" data-word="name">name</span>) <span class="word" data-word="how">how</span> <span class="word" data-word="was">was</span> <span class="word" data-word="your">your</span> <span class="word" data-word="stay">stay</span>? <span class="word" data-word="could">Could</span> <span class="word" data-word="you">you</span> <span class="word" data-word="fill">fill</span> <span class="word" data-word="in">in</span> <span class="word" data-word="guest">guest</span> <span class="word" data-word="questionnaire">questionnaire</span> <span class="word" data-word="please">please</span>.
+
+<span class="word" data-word="thank">Thank</span> <span class="word" data-word="you">you</span>, <span class="word" data-word="you">you</span> <span class="word" data-word="help">help</span> <span class="word" data-word="us">us</span> <span class="word" data-word="to">to</span> <span class="word" data-word="become">become</span> <span class="word" data-word="better">better</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">После оплаты гостем составляем обнуленный счет за доп.услуги. Кладем его в конверт и прикрепляем чек.
+ Пока все это выполняем, необходимо у гостя узнать, как прошло его проживание и дать анкету для заполнения, а после заполнения поблагодарить.</div></div><div class="row"><div class="label">Перевод</div><div class="value">(имя) как прошло ваше проживание? Не могли бы вы заполнить анкету гостя, пожалуйста.
+
+Спасибо, вы помогаете нам становиться лучше.</div></div><div class="row"><div class="label">Примечания</div><div class="value">Настаивать на заполнение гостем анкеты не стоит, он должен выполнить это добровольно.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="10" data-search="(name) your bill and check.
+действия выдаем счет и чек и проговариваем.
+перевод (имя) ваш счёт и чек.
+примечания выдается в конверте, в незаклеенном.">
+          <div class="card-head">
+            <div class="num">25</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase">(<span class="word" data-word="name">name</span>) <span class="word" data-word="your">your</span> <span class="word" data-word="bill">bill</span> <span class="word" data-word="and">and</span> <span class="word" data-word="check">check</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Выдаем счет и чек и проговариваем.</div></div><div class="row"><div class="label">Перевод</div><div class="value">(имя) ваш счёт и чек.</div></div><div class="row"><div class="label">Примечания</div><div class="value">Выдается в конверте, в незаклеенном.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="11" data-search="are you planning to visit our city?.
+действия узнать, не планирует ли гость приехать вновь.
+перевод планируете ли вы снова посетить наш город?
+примечания если планирует, нужно предложить приехать вновь и предложить сделать новое бронирование, если нет- сказать, что будете рады всегда увидеть.">
+          <div class="card-head">
+            <div class="num">26</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="are">Are</span> <span class="word" data-word="you">you</span> <span class="word" data-word="planning">planning</span> <span class="word" data-word="to">to</span> <span class="word" data-word="visit">visit</span> <span class="word" data-word="our">our</span> <span class="word" data-word="city">city</span>?.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Узнать, не планирует ли гость приехать вновь.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Планируете ли вы снова посетить наш город?</div></div><div class="row"><div class="label">Примечания</div><div class="value">Если планирует, нужно предложить приехать вновь и предложить сделать новое бронирование, если нет- сказать, что будете рады всегда увидеть.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="12" data-search="do you want to book a room for the future?
+действия если гость хочет забронировать номер на будущее,  заполняем данные гостя.
+перевод хотите забронировать номер на будущее?">
+          <div class="card-head">
+            <div class="num">27</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="do">Do</span> <span class="word" data-word="you">you</span> <span class="word" data-word="want">want</span> <span class="word" data-word="to">to</span> <span class="word" data-word="book">book</span> <span class="word" data-word="a">a</span> <span class="word" data-word="room">room</span> <span class="word" data-word="for">for</span> <span class="word" data-word="the">the</span> <span class="word" data-word="future">future</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Если гость хочет забронировать номер на будущее,  заполняем данные гостя.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Хотите забронировать номер на будущее?</div></div></div>
+        </article>
+
+        <article class="card" data-idx="13" data-search="do you need help with your luggage?
+действия предлагаем помощь с багажом.
+перевод вам нужна помощь с багажом?">
+          <div class="card-head">
+            <div class="num">28</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="do">Do</span> <span class="word" data-word="you">you</span> <span class="word" data-word="need">need</span> <span class="word" data-word="help">help</span> <span class="word" data-word="with">with</span> <span class="word" data-word="your">your</span> <span class="word" data-word="luggage">luggage</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Предлагаем помощь с багажом.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Вам нужна помощь с багажом?</div></div></div>
+        </article>
+
+        <article class="card" data-idx="14" data-search="do you need a taxi? 
+what address? what time? how many people will go?
+
+good morning\afternoon\evening, administrator (name), the hotel “7 sky”. our guest need a taxi to address ...
+действия если гостю нужно вызвать такси, то уточняем следующие данные: количество человек, время, место.
+перевод вам нужно такси?
+какой адрес? на какое время? сколько человек поедет?
+
+доброе утро\день\вечер, администратор (имя), отель «7 sky». нашему гостю нужно такси по адресу …">
+          <div class="card-head">
+            <div class="num">29</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="do">Do</span> <span class="word" data-word="you">you</span> <span class="word" data-word="need">need</span> <span class="word" data-word="a">a</span> <span class="word" data-word="taxi">taxi</span>? 
+<span class="word" data-word="what">What</span> <span class="word" data-word="address">address</span>? <span class="word" data-word="what">What</span> <span class="word" data-word="time">time</span>? <span class="word" data-word="how">How</span> <span class="word" data-word="many">many</span> <span class="word" data-word="people">people</span> <span class="word" data-word="will">will</span> <span class="word" data-word="go">go</span>?
+
+<span class="word" data-word="good">Good</span> <span class="word" data-word="morning">morning</span>\<span class="word" data-word="afternoon">afternoon</span>\<span class="word" data-word="evening">evening</span>, <span class="word" data-word="administrator">administrator</span> (<span class="word" data-word="name">name</span>), <span class="word" data-word="the">the</span> <span class="word" data-word="hotel">hotel</span> “<span class="word" data-word="7">7</span> <span class="word" data-word="sky">sky</span>”. <span class="word" data-word="our">Our</span> <span class="word" data-word="guest">guest</span> <span class="word" data-word="need">need</span> <span class="word" data-word="a">a</span> <span class="word" data-word="taxi">taxi</span> <span class="word" data-word="to">to</span> <span class="word" data-word="address">address</span> ...</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Если гостю нужно вызвать такси, то уточняем следующие данные: количество человек, время, место.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Вам нужно такси?
+Какой адрес? На какое время? Сколько человек поедет?
+
+Доброе утро\день\вечер, администратор (имя), отель «7 sky». Нашему гостю нужно такси по адресу …</div></div></div>
+        </article>
+
+        <article class="card" data-idx="15" data-search="30.
+действия ">
+          <div class="card-head">
+            <div class="num">30</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="30">30</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value"></div></div></div>
+        </article>
+
+        <article class="card" data-idx="16" data-search="can i do for you anything else? have a nice day! we will be happy to see you again.
+действия прощаемся с гостем.
+перевод могу я ещё чем-то помочь? хорошего дня! мы будем рады видеть вас снова.">
+          <div class="card-head">
+            <div class="num">31</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="can">Can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="do">do</span> <span class="word" data-word="for">for</span> <span class="word" data-word="you">you</span> <span class="word" data-word="anything">anything</span> <span class="word" data-word="else">else</span>? <span class="word" data-word="have">Have</span> <span class="word" data-word="a">a</span> <span class="word" data-word="nice">nice</span> <span class="word" data-word="day">day</span>! <span class="word" data-word="we">We</span> <span class="word" data-word="will">will</span> <span class="word" data-word="be">be</span> <span class="word" data-word="happy">happy</span> <span class="word" data-word="to">to</span> <span class="word" data-word="see">see</span> <span class="word" data-word="you">you</span> <span class="word" data-word="again">again</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Прощаемся с гостем.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Могу я ещё чем-то помочь? Хорошего дня! Мы будем рады видеть вас снова.</div></div></div>
+        </article>
+    </main>
+    <div class="empty" id="emptyState" hidden>Nothing found.</div>
+  </div>
+
+  <div class="toast" id="toast">Audio file not found</div>
+
+  <script>
+    const SCRIPT_SLUG = "checkout_company";
+    const audio = new Audio();
+    let currentEl = null;
+    let toastTimer = null;
+
+    function clearPlaying() {
+      if (currentEl) currentEl.classList.remove('playing');
+      currentEl = null;
+    }
+
+    function showToast(text) {
+      const el = document.getElementById('toast');
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 1700);
+    }
+
+    function getPlaybackRate() {
+      const active = document.querySelector('#speedSeg button.active');
+      return active ? Number(active.dataset.speed) : 1;
+    }
+
+    function playAudio(src, el, missingText) {
+      clearPlaying();
+      currentEl = el || null;
+      if (currentEl) currentEl.classList.add('playing');
+      audio.pause();
+      audio.src = src;
+      audio.currentTime = 0;
+      audio.playbackRate = getPlaybackRate();
+      audio.play().catch(() => {
+        clearPlaying();
+        showToast(missingText || 'Audio file not found');
+      });
+    }
+
+    audio.addEventListener('ended', clearPlaying);
+    audio.addEventListener('error', () => {
+      clearPlaying();
+      showToast('Audio file not found');
+    });
+
+    document.querySelectorAll('.phrase-hit').forEach(hit => {
+      hit.addEventListener('click', () => {
+        const idx = hit.closest('.card').dataset.idx;
+        playAudio(`../audio/phrases/${SCRIPT_SLUG}_${idx}.mp3`, hit, 'Phrase audio not found');
+      });
+      hit.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          hit.click();
+        }
+      });
+    });
+
+    document.querySelectorAll('.word').forEach(word => {
+      word.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playAudio(`../audio/words/${word.dataset.word}.mp3`, word, 'Word audio not found');
+      });
+    });
+
+    document.querySelectorAll('.toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.card');
+        const details = card.querySelector('.details');
+        const willOpen = !details.classList.contains('open');
+        document.querySelectorAll('.details.open').forEach(d => d.classList.remove('open'));
+        document.querySelectorAll('.toggle.open').forEach(t => { t.classList.remove('open'); t.setAttribute('aria-expanded','false'); t.textContent = '+'; });
+        if (willOpen) {
+          details.classList.add('open');
+          btn.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          btn.textContent = '–';
+        }
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      let shown = 0;
+      document.querySelectorAll('.card').forEach(card => {
+        const ok = !q || card.dataset.search.includes(q);
+        card.hidden = !ok;
+        if (ok) shown++;
+      });
+      document.getElementById('emptyState').hidden = shown !== 0;
+    });
+
+    document.querySelectorAll('#speedSeg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#speedSeg button').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        localStorage.setItem('script_speed', btn.dataset.speed);
+        audio.playbackRate = Number(btn.dataset.speed);
+      });
+    });
+
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(choice) {
+      const picked = choice || localStorage.getItem('script_theme') || 'auto';
+      const actual = picked === 'auto' ? (systemDark.matches ? 'dark' : 'light') : picked;
+      document.documentElement.setAttribute('data-theme', actual);
+      document.querySelectorAll('#themeSeg button').forEach(btn => btn.classList.toggle('active', btn.dataset.themeChoice === picked));
+    }
+    document.querySelectorAll('#themeSeg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        localStorage.setItem('script_theme', btn.dataset.themeChoice);
+        applyTheme(btn.dataset.themeChoice);
+      });
+    });
+    if (systemDark.addEventListener) systemDark.addEventListener('change', () => applyTheme());
+
+    const savedSpeed = localStorage.getItem('script_speed') || '1';
+    const speedBtn = document.querySelector(`#speedSeg button[data-speed="${savedSpeed}"]`) || document.querySelector('#speedSeg button[data-speed="1"]');
+    speedBtn.classList.add('active');
+    audio.playbackRate = Number(savedSpeed);
+    applyTheme();
+  </script>
+</body>
+</html>

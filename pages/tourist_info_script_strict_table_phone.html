@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Туристическая информация</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb;
+      --panel: rgba(255,255,255,.82);
+      --card: #ffffff;
+      --card-2: #f8faff;
+      --text: #151821;
+      --muted: #697385;
+      --line: rgba(20,24,33,.09);
+      --accent: #4f7cff;
+      --accent-2: #eaf0ff;
+      --accent-text: #1f4fd6;
+      --shadow: 0 10px 28px rgba(18, 28, 45, .08);
+      --toast: rgba(17,24,39,.92);
+      --toast-fg: #ffffff;
+    }
+    [data-theme="dark"] {
+      --bg: #0d1118;
+      --panel: rgba(17,23,34,.84);
+      --card: #121826;
+      --card-2: #161d2d;
+      --text: #eef2ff;
+      --muted: #a4aec3;
+      --line: rgba(255,255,255,.09);
+      --accent: #7da2ff;
+      --accent-2: rgba(125,162,255,.12);
+      --accent-text: #d8e3ff;
+      --shadow: 0 14px 34px rgba(0,0,0,.32);
+      --toast: rgba(240,244,255,.96);
+      --toast-fg: #0f1522;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(79,124,255,.12), transparent 22rem),
+        radial-gradient(circle at top right, rgba(111,214,255,.10), transparent 20rem),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    .wrap {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      padding: 14px 12px 38px;
+    }
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .top-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .back {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+      flex: 0 0 auto;
+    }
+    .titlebox {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .eyebrow {
+      margin: 0 0 2px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 4vw, 30px);
+      line-height: 1.08;
+      letter-spacing: -.02em;
+    }
+    .count {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+    .seg {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .seg button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .seg button.active {
+      background: var(--accent);
+      border-color: transparent;
+      color: white;
+    }
+    [data-theme="dark"] .seg button.active { color: #0f1522; }
+    .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 15px;
+      font-size: 16px;
+      outline: none;
+    }
+    .search::placeholder { color: var(--muted); }
+    .cards {
+      display: grid;
+      gap: 12px;
+    }
+    .card {
+      background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px 14px 12px;
+    }
+    .num {
+      min-width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-2);
+      color: var(--accent-text);
+      font-weight: 800;
+      font-size: 15px;
+      align-self: start;
+    }
+    .phrase-hit {
+      min-width: 0;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 14px;
+      padding: 2px 0;
+    }
+    .phrase-hit:active { transform: translateY(1px); }
+    .phrase {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .word {
+      display: inline;
+      cursor: pointer;
+      border-radius: 10px;
+      padding: 0 .05em;
+      transition: background-color .16s ease, color .16s ease;
+    }
+    .word:hover, .word:active {
+      background: var(--accent-2);
+      color: var(--accent-text);
+    }
+    .playing {
+      background: var(--accent);
+      color: white !important;
+    }
+    [data-theme="dark"] .playing { color: #0f1522 !important; }
+    .toggle {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 14px;
+      min-width: 42px;
+      height: 42px;
+      font-size: 18px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      align-self: start;
+    }
+    .toggle.open {
+      background: var(--accent-2);
+      color: var(--accent-text);
+    }
+    .details {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding: 14px;
+      gap: 10px;
+    }
+    .details.open { display: grid; }
+    .row {
+      display: grid;
+      gap: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+    }
+    .label {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .value {
+      font-size: 15px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 8px;
+      font-size: 15px;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(18px);
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--toast);
+      color: var(--toast-fg);
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 60;
+      max-width: calc(100vw - 28px);
+      text-align: center;
+      box-shadow: 0 10px 22px rgba(0,0,0,.2);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @media (max-width: 560px) {
+      .wrap { padding: 10px 10px 30px; }
+      .top { border-radius: 18px; padding: 10px; }
+      .top-row { align-items: flex-start; }
+      .back { padding: 10px 11px; }
+      .card-head { grid-template-columns: auto 1fr auto; gap: 10px; padding: 12px; }
+      .num, .toggle { min-width: 38px; height: 38px; border-radius: 12px; }
+      .phrase { font-size: 17px; line-height: 1.42; }
+      .seg button { padding: 8px 11px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="top-row">
+        <a class="back" href="index.html">← Назад</a>
+        <div class="titlebox">
+          <p class="eyebrow">Scripts</p>
+          <h1>Туристическая информация</h1>
+          <div class="count">9 phrases</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="seg" id="themeSeg">
+          <button type="button" data-theme-choice="auto">Auto</button>
+          <button type="button" data-theme-choice="light">Light</button>
+          <button type="button" data-theme-choice="dark">Dark</button>
+        </div>
+        <div class="seg" id="speedSeg">
+          <button type="button" data-speed="0.85">0.85×</button>
+          <button type="button" data-speed="1">1×</button>
+          <button type="button" data-speed="1.15">1.15×</button>
+          <button type="button" data-speed="1.3">1.3×</button>
+        </div>
+        <input id="searchInput" class="search" type="search" placeholder="Search phrase, translation, notes..." autocomplete="off" />
+      </div>
+    </div>
+
+    <main class="cards" id="cards">
+      
+        <article class="card" data-idx="1" data-search="good morning/afternoon/evening, how can i help you?
+действия приветствие гостя
+перевод доброе утро/день/вечер. чем могу помочь?
+примечания устанавливается зрительный контакт с гостем, когда гость подойдет ближе 2х метров, приветствуем.">
+          <div class="card-head">
+            <div class="num">1</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="good">Good</span> <span class="word" data-word="morning">morning</span>/<span class="word" data-word="afternoon">afternoon</span>/<span class="word" data-word="evening">evening</span>, <span class="word" data-word="how">How</span> <span class="word" data-word="can">can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="help">help</span> <span class="word" data-word="you">you</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Приветствие гостя</div></div><div class="row"><div class="label">Перевод</div><div class="value">Доброе утро/день/вечер. Чем могу помочь?</div></div><div class="row"><div class="label">Примечания</div><div class="value">Устанавливается зрительный контакт с гостем, когда гость подойдет ближе 2х метров, приветствуем.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="2" data-search="how can i call you?
+действия узнать имя гостя
+перевод как я могу к вам обращаться?
+примечания улыбаемся глазами. к гостю обращаемся в течение беседы 2-3 раза по имени.">
+          <div class="card-head">
+            <div class="num">2</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="how">How</span> <span class="word" data-word="can">can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="call">call</span> <span class="word" data-word="you">you</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Узнать имя гостя</div></div><div class="row"><div class="label">Перевод</div><div class="value">Как я могу к вам обращаться?</div></div><div class="row"><div class="label">Примечания</div><div class="value">Улыбаемся глазами. К гостю обращаемся в течение беседы 2-3 раза по имени.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="3" data-search="what would you like to see in our town?
+действия узнать, что именно интересует гостя
+перевод что вы хотели(а) бы посмотреть в нашем городе?
+примечания рассказать не менее 3 вариантов для посещения">
+          <div class="card-head">
+            <div class="num">3</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="what">What</span> <span class="word" data-word="would">would</span> <span class="word" data-word="you">you</span> <span class="word" data-word="like">like</span> <span class="word" data-word="to">to</span> <span class="word" data-word="see">see</span> <span class="word" data-word="in">in</span> <span class="word" data-word="our">our</span> <span class="word" data-word="town">town</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Узнать, что именно интересует гостя</div></div><div class="row"><div class="label">Перевод</div><div class="value">Что вы хотели(а) бы посмотреть в нашем городе?</div></div><div class="row"><div class="label">Примечания</div><div class="value">Рассказать не менее 3 вариантов для посещения</div></div></div>
+        </article>
+
+        <article class="card" data-idx="4" data-search="in our town you can visit (посетить – музеи,выставки и т.д.)/see…..
+действия рассказать о местонахождении необходимых достопримечательностей
+перевод в нашем городе вы можете посетить (музеи, выставки и т.д.) / увидеть …
+примечания показать на карте, отметить местонахождение. предложить забрать карту с собой">
+          <div class="card-head">
+            <div class="num">4</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="in">In</span> <span class="word" data-word="our">our</span> <span class="word" data-word="town">town</span> <span class="word" data-word="you">you</span> <span class="word" data-word="can">can</span> <span class="word" data-word="visit">visit</span> (посетить – музеи,выставки и т.д.)/<span class="word" data-word="see">see</span>…..</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Рассказать о местонахождении необходимых достопримечательностей</div></div><div class="row"><div class="label">Перевод</div><div class="value">В нашем городе вы можете посетить (музеи, выставки и т.д.) / увидеть …</div></div><div class="row"><div class="label">Примечания</div><div class="value">Показать на карте, отметить местонахождение. Предложить забрать карту с собой</div></div></div>
+        </article>
+
+        <article class="card" data-idx="5" data-search="you can get to …. by bus or by taxi.
+действия рассказать о способах как туда добраться
+перевод вы можете добраться до … на автобусе или на такси.
+примечания при необходимости вызвать такси. показать на карте местонахождение остановки общественного транспорта">
+          <div class="card-head">
+            <div class="num">5</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="you">You</span> <span class="word" data-word="can">can</span> <span class="word" data-word="get">get</span> <span class="word" data-word="to">to</span> …. <span class="word" data-word="by">by</span> <span class="word" data-word="bus">bus</span> <span class="word" data-word="or">or</span> <span class="word" data-word="by">by</span> <span class="word" data-word="taxi">taxi</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Рассказать о способах как туда добраться</div></div><div class="row"><div class="label">Перевод</div><div class="value">Вы можете добраться до … на автобусе или на такси.</div></div><div class="row"><div class="label">Примечания</div><div class="value">При необходимости вызвать такси. Показать на карте местонахождение остановки общественного транспорта</div></div></div>
+        </article>
+
+        <article class="card" data-idx="6" data-search="good morning/afternoon/evening hotel «seven sky». administrator _____. our guest needs a taxi from our hotel to …..
+действия вызов такси
+перевод доброе утро/день/вечер, отель «seven sky». администратор _____. нашему гостю нужно такси от нашего отеля до …
+примечания проинформировать гостя о марке машины и его номере. примерное время подачи машины.">
+          <div class="card-head">
+            <div class="num">6</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="good">Good</span> <span class="word" data-word="morning">morning</span>/<span class="word" data-word="afternoon">afternoon</span>/<span class="word" data-word="evening">evening</span> <span class="word" data-word="hotel">Hotel</span> «<span class="word" data-word="seven">Seven</span> <span class="word" data-word="sky">Sky</span>». <span class="word" data-word="administrator">Administrator</span> _____. <span class="word" data-word="our">Our</span> <span class="word" data-word="guest">guest</span> <span class="word" data-word="needs">needs</span> <span class="word" data-word="a">a</span> <span class="word" data-word="taxi">taxi</span> <span class="word" data-word="from">from</span> <span class="word" data-word="our">our</span> <span class="word" data-word="hotel">hotel</span> <span class="word" data-word="to">to</span> …..</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Вызов такси</div></div><div class="row"><div class="label">Перевод</div><div class="value">Доброе утро/день/вечер, отель «Seven Sky». Администратор _____. Нашему гостю нужно такси от нашего отеля до …</div></div><div class="row"><div class="label">Примечания</div><div class="value">Проинформировать гостя о марке машины и его номере. Примерное время подачи машины.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="7" data-search="i inform you that the reception desk is open 24 hours a day. if you have any questions, please feel free to ask me or call me from your room.
+действия сообщает гостю, что стойка размещения доступна 24 часа в сутки.
+перевод сообщаю вам, что стойка регистрации работает круглосуточно. если у вас есть вопросы, пожалуйста, обращайтесь ко мне или позвоните мне из вашего номера.">
+          <div class="card-head">
+            <div class="num">7</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="i">I</span> <span class="word" data-word="inform">inform</span> <span class="word" data-word="you">you</span> <span class="word" data-word="that">that</span> <span class="word" data-word="the">the</span> <span class="word" data-word="reception">Reception</span> <span class="word" data-word="desk">desk</span> <span class="word" data-word="is">is</span> <span class="word" data-word="open">open</span> <span class="word" data-word="24">24</span> <span class="word" data-word="hours">hours</span> <span class="word" data-word="a">a</span> <span class="word" data-word="day">day</span>. <span class="word" data-word="if">If</span> <span class="word" data-word="you">you</span> <span class="word" data-word="have">have</span> <span class="word" data-word="any">any</span> <span class="word" data-word="questions">questions</span>, <span class="word" data-word="please">please</span> <span class="word" data-word="feel">feel</span> <span class="word" data-word="free">free</span> <span class="word" data-word="to">to</span> <span class="word" data-word="ask">ask</span> <span class="word" data-word="me">me</span> <span class="word" data-word="or">or</span> <span class="word" data-word="call">call</span> <span class="word" data-word="me">me</span> <span class="word" data-word="from">from</span> <span class="word" data-word="your">your</span> <span class="word" data-word="room">room</span>.</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Сообщает гостю, что стойка размещения доступна 24 часа в сутки.</div></div><div class="row"><div class="label">Перевод</div><div class="value">Сообщаю вам, что стойка регистрации работает круглосуточно. Если у вас есть вопросы, пожалуйста, обращайтесь ко мне или позвоните мне из вашего номера.</div></div></div>
+        </article>
+
+        <article class="card" data-idx="8" data-search="can i help you with anything else?
+действия спросить, можем ли помочь чем-то еще
+перевод могу ли я помочь вам чем-то ещё?
+примечания дать понять гостю, что мы всегда готовы помочь">
+          <div class="card-head">
+            <div class="num">8</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="can">Can</span> <span class="word" data-word="i">I</span> <span class="word" data-word="help">help</span> <span class="word" data-word="you">you</span> <span class="word" data-word="with">with</span> <span class="word" data-word="anything">anything</span> <span class="word" data-word="else">else</span>?</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Спросить, можем ли помочь чем-то еще</div></div><div class="row"><div class="label">Перевод</div><div class="value">Могу ли я помочь вам чем-то ещё?</div></div><div class="row"><div class="label">Примечания</div><div class="value">Дать понять гостю, что мы всегда готовы помочь</div></div></div>
+        </article>
+
+        <article class="card" data-idx="9" data-search="have a good day!
+действия прощаемся с гостем
+перевод хорошего дня!
+примечания улыбаемся">
+          <div class="card-head">
+            <div class="num">9</div>
+            <div class="phrase-hit" role="button" tabindex="0" aria-label="Play phrase">
+              <div class="phrase"><span class="word" data-word="have">Have</span> <span class="word" data-word="a">a</span> <span class="word" data-word="good">good</span> <span class="word" data-word="day">day</span>!</div>
+            </div>
+            <button class="toggle" type="button" aria-expanded="false">+</button>
+          </div>
+          <div class="details"><div class="row"><div class="label">Действия</div><div class="value">Прощаемся с гостем</div></div><div class="row"><div class="label">Перевод</div><div class="value">Хорошего дня!</div></div><div class="row"><div class="label">Примечания</div><div class="value">Улыбаемся</div></div></div>
+        </article>
+    </main>
+    <div class="empty" id="emptyState" hidden>Nothing found.</div>
+  </div>
+
+  <div class="toast" id="toast">Audio file not found</div>
+
+  <script>
+    const SCRIPT_SLUG = "tourist_info_script_strict_table_phone";
+    const audio = new Audio();
+    let currentEl = null;
+    let toastTimer = null;
+
+    function clearPlaying() {
+      if (currentEl) currentEl.classList.remove('playing');
+      currentEl = null;
+    }
+
+    function showToast(text) {
+      const el = document.getElementById('toast');
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 1700);
+    }
+
+    function getPlaybackRate() {
+      const active = document.querySelector('#speedSeg button.active');
+      return active ? Number(active.dataset.speed) : 1;
+    }
+
+    function playAudio(src, el, missingText) {
+      clearPlaying();
+      currentEl = el || null;
+      if (currentEl) currentEl.classList.add('playing');
+      audio.pause();
+      audio.src = src;
+      audio.currentTime = 0;
+      audio.playbackRate = getPlaybackRate();
+      audio.play().catch(() => {
+        clearPlaying();
+        showToast(missingText || 'Audio file not found');
+      });
+    }
+
+    audio.addEventListener('ended', clearPlaying);
+    audio.addEventListener('error', () => {
+      clearPlaying();
+      showToast('Audio file not found');
+    });
+
+    document.querySelectorAll('.phrase-hit').forEach(hit => {
+      hit.addEventListener('click', () => {
+        const idx = hit.closest('.card').dataset.idx;
+        playAudio(`../audio/phrases/${SCRIPT_SLUG}_${idx}.mp3`, hit, 'Phrase audio not found');
+      });
+      hit.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          hit.click();
+        }
+      });
+    });
+
+    document.querySelectorAll('.word').forEach(word => {
+      word.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playAudio(`../audio/words/${word.dataset.word}.mp3`, word, 'Word audio not found');
+      });
+    });
+
+    document.querySelectorAll('.toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.card');
+        const details = card.querySelector('.details');
+        const willOpen = !details.classList.contains('open');
+        document.querySelectorAll('.details.open').forEach(d => d.classList.remove('open'));
+        document.querySelectorAll('.toggle.open').forEach(t => { t.classList.remove('open'); t.setAttribute('aria-expanded','false'); t.textContent = '+'; });
+        if (willOpen) {
+          details.classList.add('open');
+          btn.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          btn.textContent = '–';
+        }
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      let shown = 0;
+      document.querySelectorAll('.card').forEach(card => {
+        const ok = !q || card.dataset.search.includes(q);
+        card.hidden = !ok;
+        if (ok) shown++;
+      });
+      document.getElementById('emptyState').hidden = shown !== 0;
+    });
+
+    document.querySelectorAll('#speedSeg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#speedSeg button').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        localStorage.setItem('script_speed', btn.dataset.speed);
+        audio.playbackRate = Number(btn.dataset.speed);
+      });
+    });
+
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(choice) {
+      const picked = choice || localStorage.getItem('script_theme') || 'auto';
+      const actual = picked === 'auto' ? (systemDark.matches ? 'dark' : 'light') : picked;
+      document.documentElement.setAttribute('data-theme', actual);
+      document.querySelectorAll('#themeSeg button').forEach(btn => btn.classList.toggle('active', btn.dataset.themeChoice === picked));
+    }
+    document.querySelectorAll('#themeSeg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        localStorage.setItem('script_theme', btn.dataset.themeChoice);
+        applyTheme(btn.dataset.themeChoice);
+      });
+    });
+    if (systemDark.addEventListener) systemDark.addEventListener('change', () => applyTheme());
+
+    const savedSpeed = localStorage.getItem('script_speed') || '1';
+    const speedBtn = document.querySelector(`#speedSeg button[data-speed="${savedSpeed}"]`) || document.querySelector('#speedSeg button[data-speed="1"]');
+    speedBtn.classList.add('active');
+    audio.playbackRate = Number(savedSpeed);
+    applyTheme();
+  </script>
+</body>
+</html>

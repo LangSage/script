@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Scripts</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb;
+      --panel: rgba(255,255,255,.82);
+      --card: #ffffff;
+      --card-2: #f8faff;
+      --text: #151821;
+      --muted: #697385;
+      --line: rgba(20,24,33,.09);
+      --accent: #4f7cff;
+      --accent-2: #eaf0ff;
+      --accent-text: #1f4fd6;
+      --shadow: 0 10px 28px rgba(18, 28, 45, .08);
+    }
+    [data-theme="dark"] {
+      --bg: #0d1118;
+      --panel: rgba(17,23,34,.84);
+      --card: #121826;
+      --card-2: #161d2d;
+      --text: #eef2ff;
+      --muted: #a4aec3;
+      --line: rgba(255,255,255,.09);
+      --accent: #7da2ff;
+      --accent-2: rgba(125,162,255,.12);
+      --accent-text: #d8e3ff;
+      --shadow: 0 14px 34px rgba(0,0,0,.32);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(79,124,255,.12), transparent 22rem),
+        radial-gradient(circle at top right, rgba(111,214,255,.10), transparent 20rem),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    .wrap {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      padding: 14px 12px 36px;
+    }
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .eyebrow {
+      margin: 0 0 4px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 38px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+    .sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .seg {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .seg button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .seg button.active {
+      background: var(--accent);
+      border-color: transparent;
+      color: white;
+    }
+    [data-theme="dark"] .seg button.active { color: #0f1522; }
+    .search {
+      width: 100%;
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 15px;
+      font-size: 16px;
+      outline: none;
+    }
+    .cards {
+      display: grid;
+      gap: 12px;
+    }
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .card:active { transform: translateY(1px); }
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .go {
+      min-width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-2);
+      color: var(--accent-text);
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 8px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <p class="eyebrow">Hotel scripts</p>
+      <h1>Scripts</h1>
+      <p class="sub">Phone-friendly pages with clickable words, phrase audio, details, and light/dark theme.</p>
+
+      <div class="seg" id="themeSeg">
+        <button type="button" data-theme-choice="auto">Auto</button>
+        <button type="button" data-theme-choice="light">Light</button>
+        <button type="button" data-theme-choice="dark">Dark</button>
+      </div>
+
+      <input id="searchInput" class="search" type="search" placeholder="Search scripts..." autocomplete="off" />
+    </section>
+
+    <main class="cards" id="cards">
+      <a class="card" href="walk_in.html" data-search="заезд без бронирования (walk-in) walk_in">
+          <div class="card-top">
+            <div class="title">Заезд без бронирования (Walk-in)</div>
+            <div class="go">→</div>
+          </div>
+          <div class="meta">26 phrases</div>
+        </a>
+<a class="card" href="checkout_company.html" data-search="выезд: гость от компании (check-out) checkout_company">
+          <div class="card-top">
+            <div class="title">Выезд: гость от компании (Check-out)</div>
+            <div class="go">→</div>
+          </div>
+          <div class="meta">16 phrases</div>
+        </a>
+<a class="card" href="checkout_direct_guest.html" data-search="выезд: прямой гость (check-out) checkout_direct_guest">
+          <div class="card-top">
+            <div class="title">Выезд: прямой гость (Check-out)</div>
+            <div class="go">→</div>
+          </div>
+          <div class="meta">16 phrases</div>
+        </a>
+<a class="card" href="checkout_touragency.html" data-search="выезд: гость от турфирмы (check-out) checkout_touragency">
+          <div class="card-top">
+            <div class="title">Выезд: гость от турфирмы (Check-out)</div>
+            <div class="go">→</div>
+          </div>
+          <div class="meta">15 phrases</div>
+        </a>
+<a class="card" href="tourist_info_script_strict_table_phone.html" data-search="туристическая информация tourist_info_script_strict_table_phone">
+          <div class="card-top">
+            <div class="title">Туристическая информация</div>
+            <div class="go">→</div>
+          </div>
+          <div class="meta">9 phrases</div>
+        </a>
+    </main>
+    <div class="empty" id="emptyState" hidden>Nothing found.</div>
+  </div>
+
+  <script>
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    function applyTheme(choice) {
+      const picked = choice || localStorage.getItem('script_theme') || 'auto';
+      const actual = picked === 'auto' ? (systemDark.matches ? 'dark' : 'light') : picked;
+      document.documentElement.setAttribute('data-theme', actual);
+      document.querySelectorAll('#themeSeg button').forEach(btn => btn.classList.toggle('active', btn.dataset.themeChoice === picked));
+    }
+    document.querySelectorAll('#themeSeg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        localStorage.setItem('script_theme', btn.dataset.themeChoice);
+        applyTheme(btn.dataset.themeChoice);
+      });
+    });
+    if (systemDark.addEventListener) systemDark.addEventListener('change', () => applyTheme());
+    applyTheme();
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      let shown = 0;
+      document.querySelectorAll('.card').forEach(card => {
+        const ok = !q || card.dataset.search.includes(q);
+        card.hidden = !ok;
+        if (ok) shown++;
+      });
+      document.getElementById('emptyState').hidden = shown !== 0;
+    });
+  </script>
+</body>
+</html>
