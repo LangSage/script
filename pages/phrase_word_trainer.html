@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Тренажер слов и фраз</title>
+  <title>Тренажер фраз для экзамена</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -233,6 +233,40 @@
       font-size: 14px;
       line-height: 1.45;
       min-height: 20px;
+    }
+    .word-peek {
+      display: grid;
+      gap: 3px;
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--soft);
+      padding: 10px 12px;
+    }
+    .word-peek b {
+      font-size: 15px;
+      line-height: 1.2;
+    }
+    .word-peek span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+    .click-word {
+      display: inline;
+      border-radius: 9px;
+      padding: 0 .06em;
+      color: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+    .click-word:hover,
+    .click-word:active {
+      background: var(--teal-soft);
+      color: var(--teal);
     }
     .options {
       display: grid;
@@ -469,8 +503,8 @@
       <div class="topline">
         <a class="back" href="index.html" title="Назад">←</a>
         <div>
-          <h1>Тренажер слов и фраз</h1>
-          <div class="subline">7 уровней. Слова из гостиничных скриптов.</div>
+          <h1>Тренажер фраз для экзамена</h1>
+          <div class="subline">Только 3 рабочих режима: собрать, закрыть пропуск, выбрать реплику.</div>
         </div>
         <button class="iconbtn" type="button" id="themeBtn" title="Тема">☼</button>
       </div>
@@ -494,6 +528,7 @@
         </div>
         <div class="quiz-body">
           <div class="task" id="taskText"></div>
+          <div class="word-peek" id="wordPeek"><b>Нажми на слово</b><span>перевод и звук появятся здесь</span></div>
           <div class="options" id="options"></div>
           <div class="build-zone" id="buildZone" hidden>
             <div class="answer-line" id="answerLine"></div>
@@ -518,7 +553,6 @@
       <section class="dictionary">
         <div class="dict-head">
           <h2 class="dict-title">Словарь спасения</h2>
-          <div class="seg" id="groupTabs" aria-label="Группы слов"></div>
           <input class="search" id="dictSearch" type="search" placeholder="Найти слово..." autocomplete="off" />
         </div>
         <div class="word-grid" id="wordGrid"></div>
@@ -528,587 +562,8 @@
 
   <div class="toast" id="toast">Audio not found</div>
 
-  <script>
-    const WORDS = [
-      { en: 'good', ru: 'хороший / добрый', group: 'start' },
-      { en: 'morning', ru: 'утро', group: 'start' },
-      { en: 'afternoon', ru: 'день', group: 'start' },
-      { en: 'evening', ru: 'вечер', group: 'start' },
-      { en: 'help', ru: 'помочь', group: 'start' },
-      { en: 'name', ru: 'имя', group: 'start' },
-      { en: 'please', ru: 'пожалуйста', group: 'start' },
-      { en: 'anything', ru: 'что-нибудь', group: 'start' },
-      { en: 'else', ru: 'еще', group: 'start' },
-      { en: 'nice', ru: 'приятный / хороший', group: 'start' },
-      { en: 'day', ru: 'день', group: 'start' },
-
-      { en: 'reservation', ru: 'бронь', group: 'checkin' },
-      { en: 'dates', ru: 'даты', group: 'checkin' },
-      { en: 'people', ru: 'люди / человек', group: 'checkin' },
-      { en: 'child', ru: 'ребенок', group: 'checkin' },
-      { en: 'category', ru: 'категория', group: 'checkin' },
-      { en: 'room', ru: 'номер / комната', group: 'checkin' },
-      { en: 'lux', ru: 'люкс', group: 'checkin' },
-      { en: 'comfort', ru: 'комфорт', group: 'checkin' },
-      { en: 'standard', ru: 'стандарт', group: 'checkin' },
-      { en: 'wishes', ru: 'пожелания', group: 'checkin' },
-      { en: 'passport', ru: 'паспорт', group: 'checkin' },
-      { en: 'copy', ru: 'копия', group: 'checkin' },
-      { en: 'documents', ru: 'документы', group: 'checkin' },
-      { en: 'form', ru: 'форма', group: 'checkin' },
-      { en: 'sign', ru: 'подписать', group: 'checkin' },
-      { en: 'signature', ru: 'подпись', group: 'checkin' },
-      { en: 'ready', ru: 'готово', group: 'checkin' },
-      { en: 'key', ru: 'ключ', group: 'checkin' },
-      { en: 'guest', ru: 'гость', group: 'checkin' },
-      { en: 'card', ru: 'карта', group: 'checkin' },
-
-      { en: 'food', ru: 'питание / еда', group: 'food' },
-      { en: 'package', ru: 'пакет', group: 'food' },
-      { en: 'daily', ru: 'ежедневно', group: 'food' },
-      { en: 'breakfast', ru: 'завтрак', group: 'food' },
-      { en: 'lunch', ru: 'обед', group: 'food' },
-      { en: 'dinner', ru: 'ужин', group: 'food' },
-      { en: 'full', ru: 'полный', group: 'food' },
-      { en: 'board', ru: 'питание / пансион', group: 'food' },
-      { en: 'served', ru: 'подается', group: 'food' },
-      { en: 'restaurant', ru: 'ресторан', group: 'food' },
-
-      { en: 'price', ru: 'цена', group: 'money' },
-      { en: 'rubles', ru: 'рубли', group: 'money' },
-      { en: 'bill', ru: 'счет', group: 'money' },
-      { en: 'pay', ru: 'платить', group: 'money' },
-      { en: 'cash', ru: 'наличные', group: 'money' },
-      { en: 'credit', ru: 'кредитный', group: 'money' },
-      { en: 'company', ru: 'компания', group: 'money' },
-
-      { en: 'left', ru: 'слева', group: 'place' },
-      { en: 'right', ru: 'справа', group: 'place' },
-      { en: 'floor', ru: 'этаж', group: 'place' },
-      { en: 'ground', ru: 'первый / нижний', group: 'place' },
-      { en: 'reception', ru: 'ресепшн', group: 'place' },
-      { en: 'open', ru: 'открыт / работает', group: 'place' },
-      { en: 'phone', ru: 'телефон', group: 'place' },
-      { en: 'luggage', ru: 'багаж', group: 'place' },
-      { en: 'fitness', ru: 'фитнес', group: 'place' },
-      { en: 'spa', ru: 'спа', group: 'place' },
-      { en: 'cafe', ru: 'кафе', group: 'place' },
-      { en: 'website', ru: 'сайт', group: 'place' },
-      { en: 'information', ru: 'информация', group: 'place' },
-
-      { en: 'taxi', ru: 'такси', group: 'travel' },
-      { en: 'address', ru: 'адрес', group: 'travel' },
-      { en: 'time', ru: 'время', group: 'travel' },
-      { en: 'city', ru: 'город', group: 'travel' },
-      { en: 'visa', ru: 'виза', group: 'travel' },
-      { en: 'migration', ru: 'миграция', group: 'travel' }
-    ];
-
-    const PHRASES = [
-      { ru: 'Чем могу помочь?', en: 'How can I help you?', parts: ['How', 'can', 'I', 'help', 'you'] },
-      { ru: 'Как вас зовут?', en: 'What is your name, please?', parts: ['What', 'is', 'your', 'name', 'please'] },
-      { ru: 'У вас есть бронь?', en: 'Do you have a reservation?', parts: ['Do', 'you', 'have', 'a', 'reservation'] },
-      { ru: 'Какие даты?', en: 'What dates, please?', parts: ['What', 'dates', 'please'] },
-      { ru: 'Сколько человек?', en: 'How many people?', parts: ['How', 'many', 'people'] },
-      { ru: 'Сколько лет ребенку?', en: 'How old is your child?', parts: ['How', 'old', 'is', 'your', 'child'] },
-      { ru: 'Какая категория номера?', en: 'What room category?', parts: ['What', 'room', 'category'] },
-      { ru: 'Есть пожелания?', en: 'Any wishes?', parts: ['Any', 'wishes'] },
-      { ru: 'Какой пакет питания?', en: 'Which food package?', parts: ['Which', 'food', 'package'] },
-      { ru: 'Полная цена в рублях.', en: 'The full price is rubles.', parts: ['The', 'full', 'price', 'is', 'rubles'] },
-      { ru: 'Паспорт, пожалуйста.', en: 'Your passport, please.', parts: ['Your', 'passport', 'please'] },
-      { ru: 'Можно сделать копию?', en: 'May I make a copy?', parts: ['May', 'I', 'make', 'a', 'copy'] },
-      { ru: 'Заполните форму.', en: 'Please fill in the form.', parts: ['Please', 'fill', 'in', 'the', 'form'] },
-      { ru: 'Подпишите здесь.', en: 'Please sign here.', parts: ['Please', 'sign', 'here'] },
-      { ru: 'Вот ваши документы.', en: 'Here are your documents.', parts: ['Here', 'are', 'your', 'documents'] },
-      { ru: 'Номер готов.', en: 'Your room is ready.', parts: ['Your', 'room', 'is', 'ready'] },
-      { ru: 'Вот ключ и карта гостя.', en: 'Here are your key and guest card.', parts: ['Here', 'are', 'your', 'key', 'and', 'guest', 'card'] },
-      { ru: 'Номер слева.', en: 'Your room is on the left.', parts: ['Your', 'room', 'is', 'on', 'the', 'left'] },
-      { ru: 'Завтрак подается с 7 до 10.', en: 'Breakfast is served from 7 to 10.', parts: ['Breakfast', 'is', 'served', 'from', '7', 'to', '10'] },
-      { ru: 'Информация на сайте.', en: 'Information is on the website.', parts: ['Information', 'is', 'on', 'the', 'website'] },
-      { ru: 'Ресепшн работает 24/7.', en: 'The reception is open 24/7.', parts: ['The', 'reception', 'is', 'open', '24/7'] },
-      { ru: 'Нужна помощь с багажом?', en: 'Do you need help with your luggage?', parts: ['Do', 'you', 'need', 'help', 'with', 'your', 'luggage'] },
-      { ru: 'Что-то еще?', en: 'Anything else?', parts: ['Anything', 'else'] },
-      { ru: 'Хорошего дня!', en: 'Have a nice day!', parts: ['Have', 'a', 'nice', 'day'] },
-      { ru: 'Могу я увидеть ключ?', en: 'Can I see the key?', parts: ['Can', 'I', 'see', 'the', 'key'] },
-      { ru: 'Нужен счет?', en: 'Do you need a bill?', parts: ['Do', 'you', 'need', 'a', 'bill'] },
-      { ru: 'Вы будете платить картой?', en: 'Will you pay by card?', parts: ['Will', 'you', 'pay', 'by', 'card'] },
-      { ru: 'Вам нужно такси?', en: 'Do you need a taxi?', parts: ['Do', 'you', 'need', 'a', 'taxi'] },
-      { ru: 'Какой адрес?', en: 'What address?', parts: ['What', 'address'] },
-      { ru: 'В какое время?', en: 'What time?', parts: ['What', 'time'] }
-    ];
-
-    const SCENARIOS = [
-      { ru: 'Гость подошел к стойке.', en: 'How can I help you?' },
-      { ru: 'Нужно узнать имя.', en: 'What is your name, please?' },
-      { ru: 'Нужно проверить бронь.', en: 'Do you have a reservation?' },
-      { ru: 'Нужно спросить даты.', en: 'What dates, please?' },
-      { ru: 'Нужно узнать количество гостей.', en: 'How many people?' },
-      { ru: 'Гость с ребенком.', en: 'How old is your child?' },
-      { ru: 'Нужно попросить паспорт.', en: 'Your passport, please.' },
-      { ru: 'Нужно попросить подпись.', en: 'Please sign here.' },
-      { ru: 'Нужно отдать документы.', en: 'Here are your documents.' },
-      { ru: 'Номер уже готов.', en: 'Your room is ready.' },
-      { ru: 'Нужно сказать, где номер.', en: 'Your room is on the left.' },
-      { ru: 'Гость спрашивает про завтрак.', en: 'Breakfast is served from 7 to 10.' },
-      { ru: 'Нужно сказать про ресепшн.', en: 'The reception is open 24/7.' },
-      { ru: 'Нужно предложить помощь с багажом.', en: 'Do you need help with your luggage?' },
-      { ru: 'Разговор почти закончен.', en: 'Anything else?' },
-      { ru: 'Нужно попрощаться.', en: 'Have a nice day!' },
-      { ru: 'Гость выезжает и нужен ключ.', en: 'Can I see the key?' },
-      { ru: 'Нужно спросить про счет.', en: 'Do you need a bill?' },
-      { ru: 'Нужно узнать адрес для такси.', en: 'What address?' }
-    ];
-
-    const GROUPS = [
-      { id: 'all', label: 'Все' },
-      { id: 'start', label: 'Старт' },
-      { id: 'checkin', label: 'Заезд' },
-      { id: 'food', label: 'Еда' },
-      { id: 'money', label: 'Деньги' },
-      { id: 'place', label: 'Место' },
-      { id: 'travel', label: 'Такси' }
-    ];
-
-    const LEVELS = [
-      { id: 1, label: '1 Слово', name: 'Слово -> смысл', task: 'Выберите русский смысл.' },
-      { id: 2, label: '2 Смысл', name: 'Смысл -> слово', task: 'Выберите английское слово.' },
-      { id: 3, label: '3 Слух', name: 'Слух -> слово', task: 'Слушайте и выберите слово.' },
-      { id: 4, label: '4 Кусок', name: 'Короткая фраза', task: 'Выберите готовый кусок фразы.' },
-      { id: 5, label: '5 Собери', name: 'Сборка фразы', task: 'Соберите фразу из слов.' },
-      { id: 6, label: '6 Пропуск', name: 'Пропущенное слово', task: 'Выберите слово для пропуска.' },
-      { id: 7, label: '7 Экзамен', name: 'Экзамен-микс', task: 'Выберите, что сказать гостю.' }
-    ];
-
-    const ROUND_SIZE = 10;
-    const WORD_INDEX = new Map(WORDS.map(item => [item.en.toLowerCase(), item]));
-    const audio = new Audio();
-    let toastTimer = null;
-    let currentGroup = 'all';
-    let currentQuestion = null;
-    let selectedBuild = [];
-    let locked = false;
-    const state = {
-      level: 1,
-      answered: 0,
-      correct: 0,
-      streak: 0,
-      best: JSON.parse(localStorage.getItem('phrase_trainer_best') || '{}')
-    };
-
-    const $ = (id) => document.getElementById(id);
-
-    function cleanToken(value) {
-      return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '');
-    }
-
-    function normalizeAnswer(value) {
-      return String(value).toLowerCase().replace(/[^a-z0-9а-яё]+/gi, '');
-    }
-
-    function shuffle(list) {
-      const copy = [...list];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    function sample(list) {
-      return list[Math.floor(Math.random() * list.length)];
-    }
-
-    function choicesFrom(pool, answer, count = 4) {
-      const cleanAnswer = normalizeAnswer(answer);
-      const wrong = shuffle(pool.filter(item => normalizeAnswer(item) !== cleanAnswer)).slice(0, count - 1);
-      return shuffle([answer, ...wrong]);
-    }
-
-    function showToast(text) {
-      const toast = $('toast');
-      toast.textContent = text;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
-    }
-
-    function speakText(text) {
-      audio.pause();
-      if (!('speechSynthesis' in window)) {
-        showToast('Audio is not available');
-        return;
-      }
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.82;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function playWord(word) {
-      const token = cleanToken(word);
-      if (!token || !WORD_INDEX.has(token)) {
-        speakText(word);
-        return;
-      }
-      window.speechSynthesis?.cancel();
-      audio.pause();
-      audio.src = `../audio/words/${token}.mp3`;
-      audio.currentTime = 0;
-      audio.playbackRate = 1;
-      audio.play().catch(() => speakText(word));
-    }
-
-    function setTheme(choice) {
-      const picked = choice || localStorage.getItem('script_theme') || 'auto';
-      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const actual = picked === 'auto' ? (dark ? 'dark' : 'light') : picked;
-      document.documentElement.setAttribute('data-theme', actual);
-      $('themeBtn').textContent = actual === 'dark' ? '☾' : '☼';
-    }
-
-    function cycleTheme() {
-      const current = localStorage.getItem('script_theme') || 'auto';
-      const next = current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
-      localStorage.setItem('script_theme', next);
-      setTheme(next);
-      showToast(next === 'auto' ? 'Auto theme' : `${next} theme`);
-    }
-
-    function renderLevelTabs() {
-      $('levelTabs').innerHTML = LEVELS.map(level => (
-        `<button type="button" data-level="${level.id}" class="${level.id === state.level ? 'active' : ''}">${level.label}</button>`
-      )).join('');
-      $('levelTabs').querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => beginLevel(Number(btn.dataset.level)));
-      });
-    }
-
-    function renderGroupTabs() {
-      $('groupTabs').innerHTML = GROUPS.map(group => (
-        `<button type="button" data-group="${group.id}" class="${group.id === currentGroup ? 'active' : ''}">${group.label}</button>`
-      )).join('');
-      $('groupTabs').querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentGroup = btn.dataset.group;
-          renderGroupTabs();
-          renderDictionary();
-        });
-      });
-    }
-
-    function renderStats() {
-      $('scoreNow').textContent = `${state.correct}/${state.answered}`;
-      $('streakNow').textContent = state.streak;
-      $('bestNow').textContent = state.best[state.level] || 0;
-    }
-
-    function updateBest() {
-      const best = state.best[state.level] || 0;
-      if (state.streak > best) {
-        state.best[state.level] = state.streak;
-        localStorage.setItem('phrase_trainer_best', JSON.stringify(state.best));
-      }
-    }
-
-    function supportWordsFor(text) {
-      const found = [];
-      String(text).split(/\s+/).forEach(raw => {
-        const token = cleanToken(raw);
-        if (WORD_INDEX.has(token) && !found.includes(token)) found.push(token);
-      });
-      return found.slice(0, 14);
-    }
-
-    function renderSupport(text) {
-      const words = supportWordsFor(text);
-      $('supportWords').innerHTML = words.length ? words.map(token => {
-        const item = WORD_INDEX.get(token);
-        return `<button class="word-chip" type="button" data-word="${token}">${item.en} - ${item.ru}</button>`;
-      }).join('') : '<span class="task">Нет отдельных слов.</span>';
-      $('supportWords').querySelectorAll('[data-word]').forEach(btn => {
-        btn.addEventListener('click', () => playWord(btn.dataset.word));
-      });
-    }
-
-    function makeQuestion() {
-      if (state.level === 1) {
-        const item = sample(WORDS);
-        return {
-          type: 'choice',
-          prompt: item.en,
-          task: LEVELS[0].task,
-          answer: item.ru,
-          choices: choicesFrom(WORDS.map(w => w.ru), item.ru),
-          audio: item.en,
-          support: item.en
-        };
-      }
-      if (state.level === 2) {
-        const item = sample(WORDS);
-        return {
-          type: 'choice',
-          prompt: item.ru,
-          task: LEVELS[1].task,
-          answer: item.en,
-          choices: choicesFrom(WORDS.map(w => w.en), item.en),
-          audio: item.en,
-          support: item.en
-        };
-      }
-      if (state.level === 3) {
-        const item = sample(WORDS);
-        return {
-          type: 'choice',
-          prompt: '▶',
-          task: LEVELS[2].task,
-          answer: item.en,
-          choices: choicesFrom(WORDS.map(w => w.en), item.en),
-          audio: item.en,
-          support: item.en,
-          autoListen: true
-        };
-      }
-      if (state.level === 4) {
-        const item = sample(PHRASES);
-        return {
-          type: 'choice',
-          prompt: item.ru,
-          task: LEVELS[3].task,
-          answer: item.en,
-          choices: choicesFrom(PHRASES.map(p => p.en), item.en),
-          audioText: item.en,
-          support: item.en
-        };
-      }
-      if (state.level === 5) {
-        const item = sample(PHRASES.filter(p => p.parts.length <= 7));
-        const extra = shuffle(WORDS.map(w => w.en)).filter(w => !item.parts.some(part => cleanToken(part) === cleanToken(w))).slice(0, 3);
-        return {
-          type: 'build',
-          prompt: item.ru,
-          task: LEVELS[4].task,
-          answer: item.parts.join(' '),
-          target: item.parts,
-          bank: shuffle([...item.parts, ...extra]),
-          audioText: item.en,
-          support: item.en
-        };
-      }
-      if (state.level === 6) {
-        const item = sample(PHRASES.filter(p => p.parts.some(part => WORD_INDEX.has(cleanToken(part)))));
-        const candidates = item.parts.filter(part => WORD_INDEX.has(cleanToken(part)));
-        const gap = sample(candidates);
-        const blank = item.parts.map(part => part === gap ? '____' : part).join(' ');
-        const pool = WORDS.map(w => w.en);
-        return {
-          type: 'choice',
-          prompt: blank,
-          task: LEVELS[5].task,
-          answer: gap,
-          choices: choicesFrom(pool, gap),
-          audioText: item.en,
-          support: item.en
-        };
-      }
-      const item = sample(SCENARIOS);
-      return {
-        type: 'choice',
-        prompt: item.ru,
-        task: LEVELS[6].task,
-        answer: item.en,
-        choices: choicesFrom(PHRASES.map(p => p.en), item.en),
-        audioText: item.en,
-        support: item.en
-      };
-    }
-
-    function beginLevel(level) {
-      state.level = level;
-      state.answered = 0;
-      state.correct = 0;
-      state.streak = 0;
-      renderLevelTabs();
-      renderStats();
-      nextQuestion();
-    }
-
-    function nextQuestion() {
-      if (state.answered >= ROUND_SIZE) {
-        renderRoundEnd();
-        return;
-      }
-      locked = false;
-      selectedBuild = [];
-      currentQuestion = makeQuestion();
-      const level = LEVELS.find(item => item.id === state.level);
-      $('levelName').textContent = level.name;
-      $('prompt').textContent = currentQuestion.prompt;
-      $('taskText').textContent = currentQuestion.task || level.task;
-      $('feedback').className = 'feedback';
-      $('feedback').textContent = 'Выберите ответ.';
-      $('nextBtn').textContent = 'Дальше';
-      $('nextBtn').disabled = true;
-      $('options').hidden = currentQuestion.type === 'build';
-      $('buildZone').hidden = currentQuestion.type !== 'build';
-      renderSupport(currentQuestion.support || currentQuestion.answer || currentQuestion.prompt);
-      if (currentQuestion.type === 'build') {
-        renderBuild();
-      } else {
-        renderOptions(currentQuestion.choices);
-      }
-    }
-
-    function renderRoundEnd() {
-      locked = true;
-      const percent = Math.round((state.correct / ROUND_SIZE) * 100);
-      $('levelName').textContent = LEVELS.find(item => item.id === state.level).name;
-      $('prompt').textContent = `${state.correct}/${ROUND_SIZE}`;
-      $('taskText').textContent = percent >= 80 ? 'Раунд сдан.' : 'Еще один круг.';
-      $('options').hidden = true;
-      $('buildZone').hidden = true;
-      $('feedback').className = percent >= 80 ? 'feedback good' : 'feedback bad';
-      $('feedback').textContent = percent >= 80 ? 'Отлично. Можно идти дальше.' : 'Нормально. Повторение здесь работает лучше, чем зубрежка.';
-      $('nextBtn').disabled = false;
-      $('nextBtn').textContent = state.level < 7 ? 'Следующий уровень' : 'Повторить';
-      renderSupport('');
-    }
-
-    function renderOptions(choices) {
-      $('options').innerHTML = choices.map(choice => (
-        `<button class="option" type="button" data-value="${escapeHtml(choice)}">${escapeHtml(choice)}</button>`
-      )).join('');
-      $('options').querySelectorAll('.option').forEach(btn => {
-        btn.addEventListener('click', () => handleChoice(btn.dataset.value, btn));
-      });
-    }
-
-    function renderBuild() {
-      $('answerLine').innerHTML = selectedBuild.length ? selectedBuild.map(item => (
-        `<span class="selected-word">${escapeHtml(item.word)}</span>`
-      )).join('') : '<span class="task">...</span>';
-      $('bank').innerHTML = currentQuestion.bank.map((word, index) => {
-        const used = selectedBuild.some(item => item.index === index);
-        return `<button class="bank-word" type="button" data-index="${index}" ${used ? 'disabled' : ''}>${escapeHtml(word)}</button>`;
-      }).join('');
-      $('bank').querySelectorAll('.bank-word').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const index = Number(btn.dataset.index);
-          selectedBuild.push({ index, word: currentQuestion.bank[index] });
-          renderBuild();
-        });
-      });
-    }
-
-    function markAnswered(isCorrect, answerText) {
-      locked = true;
-      state.answered += 1;
-      if (isCorrect) {
-        state.correct += 1;
-        state.streak += 1;
-        $('feedback').className = 'feedback good';
-        $('feedback').textContent = `Правильно: ${answerText}`;
-      } else {
-        state.streak = 0;
-        $('feedback').className = 'feedback bad';
-        $('feedback').textContent = `Правильно: ${answerText}`;
-      }
-      updateBest();
-      renderStats();
-      $('nextBtn').disabled = false;
-      if (currentQuestion.audioText) speakText(currentQuestion.audioText);
-      else if (currentQuestion.audio) playWord(currentQuestion.audio);
-    }
-
-    function handleChoice(value, btn) {
-      if (locked) return;
-      const isCorrect = normalizeAnswer(value) === normalizeAnswer(currentQuestion.answer);
-      document.querySelectorAll('.option').forEach(option => {
-        if (normalizeAnswer(option.dataset.value) === normalizeAnswer(currentQuestion.answer)) option.classList.add('correct');
-      });
-      if (!isCorrect) btn.classList.add('wrong');
-      markAnswered(isCorrect, currentQuestion.answer);
-    }
-
-    function checkBuildAnswer() {
-      if (locked || currentQuestion?.type !== 'build') return;
-      const selected = selectedBuild.map(item => item.word).join(' ');
-      const isCorrect = normalizeAnswer(selected) === normalizeAnswer(currentQuestion.answer);
-      markAnswered(isCorrect, currentQuestion.answer);
-    }
-
-    function clearBuildAnswer() {
-      if (locked) return;
-      selectedBuild = [];
-      renderBuild();
-    }
-
-    function showHint() {
-      if (!currentQuestion) return;
-      const text = currentQuestion.answer || currentQuestion.audioText || currentQuestion.support;
-      $('feedback').className = 'feedback';
-      $('feedback').textContent = `Подсказка: ${text}`;
-      renderSupport(text);
-      if (currentQuestion.audio) playWord(currentQuestion.audio);
-      else speakText(text);
-    }
-
-    function playCurrent() {
-      if (!currentQuestion) return;
-      if (currentQuestion.audio) playWord(currentQuestion.audio);
-      else speakText(currentQuestion.audioText || currentQuestion.answer || currentQuestion.prompt);
-    }
-
-    function renderDictionary() {
-      const q = $('dictSearch').value.trim().toLowerCase();
-      const list = WORDS.filter(item => {
-        const groupOk = currentGroup === 'all' || item.group === currentGroup;
-        const textOk = !q || item.en.includes(q) || item.ru.toLowerCase().includes(q);
-        return groupOk && textOk;
-      });
-      $('wordGrid').innerHTML = list.map(item => (
-        `<div class="word-card">
-          <div>
-            <div class="word-en">${escapeHtml(item.en)}</div>
-            <div class="word-ru">${escapeHtml(item.ru)}</div>
-          </div>
-          <button class="mini-play" type="button" data-word="${escapeHtml(item.en)}" title="Слушать">▶</button>
-        </div>`
-      )).join('');
-      $('wordGrid').querySelectorAll('[data-word]').forEach(btn => {
-        btn.addEventListener('click', () => playWord(btn.dataset.word));
-      });
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;');
-    }
-
-    $('themeBtn').addEventListener('click', cycleTheme);
-    $('listenBtn').addEventListener('click', playCurrent);
-    $('hintBtn').addEventListener('click', showHint);
-    $('nextBtn').addEventListener('click', () => {
-      if (state.answered >= ROUND_SIZE) {
-        beginLevel(state.level < 7 ? state.level + 1 : 1);
-      } else {
-        nextQuestion();
-      }
-    });
-    $('clearBuild').addEventListener('click', clearBuildAnswer);
-    $('checkBuild').addEventListener('click', checkBuildAnswer);
-    $('dictSearch').addEventListener('input', renderDictionary);
-
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
-    if (systemDark.addEventListener) systemDark.addEventListener('change', () => setTheme());
-    setTheme();
-    renderLevelTabs();
-    renderGroupTabs();
-    renderDictionary();
-    beginLevel(1);
-  </script>
+  <script src="words.js"></script>
+  <script src="words_extra.js"></script>
+  <script src="phrase_word_trainer.js"></script>
 </body>
 </html>
