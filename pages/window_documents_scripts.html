@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Открытое окно и документы</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb;
+      --panel: rgba(255,255,255,.86);
+      --card: #ffffff;
+      --soft: #f7f9ff;
+      --text: #151821;
+      --muted: #697385;
+      --line: rgba(20,24,33,.1);
+      --accent: #4f7cff;
+      --accent-soft: #eaf0ff;
+      --accent-text: #1f4fd6;
+      --guest: #fff4e9;
+      --guest-text: #9a4b10;
+      --ok: #16805a;
+      --shadow: 0 12px 30px rgba(18, 28, 45, .08);
+      --toast: rgba(17,24,39,.92);
+      --toast-fg: #fff;
+    }
+    [data-theme="dark"] {
+      --bg: #0d1118;
+      --panel: rgba(17,23,34,.88);
+      --card: #121826;
+      --soft: #171f30;
+      --text: #eef2ff;
+      --muted: #a4aec3;
+      --line: rgba(255,255,255,.1);
+      --accent: #7da2ff;
+      --accent-soft: rgba(125,162,255,.15);
+      --accent-text: #d8e3ff;
+      --guest: rgba(255,179,112,.13);
+      --guest-text: #ffd0a8;
+      --ok: #7ad7ad;
+      --shadow: 0 16px 36px rgba(0,0,0,.32);
+      --toast: rgba(240,244,255,.96);
+      --toast-fg: #0f1522;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    button {
+      font: inherit;
+    }
+    .wrap {
+      width: min(100%, 920px);
+      margin: 0 auto;
+      padding: 12px 12px 38px;
+    }
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .top-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+    .back, .theme, .play, .tab {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .back {
+      text-decoration: none;
+      min-width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+    .theme {
+      min-width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      font-weight: 900;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(20px, 4vw, 29px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+    .sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .tab.active {
+      background: var(--accent);
+      border-color: transparent;
+      color: white;
+    }
+    [data-theme="dark"] .tab.active {
+      color: #0f1522;
+    }
+    .peek {
+      display: grid;
+      gap: 4px;
+      padding: 11px 13px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      min-height: 58px;
+    }
+    .peek b {
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    .peek span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+    .script {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .intro {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+    .intro h2 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.2;
+    }
+    .intro p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .line {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 13px;
+    }
+    .line.guest {
+      background: var(--guest);
+    }
+    .play {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: var(--accent-text);
+      background: var(--accent-soft);
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .speaker {
+      margin: 0 0 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+    .guest .speaker {
+      color: var(--guest-text);
+    }
+    .english {
+      font-size: 18px;
+      line-height: 1.48;
+      font-weight: 760;
+      word-break: break-word;
+    }
+    .translation {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.42;
+      font-size: 14px;
+    }
+    .word {
+      display: inline;
+      border-radius: 9px;
+      padding: 0 .06em;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+    .word:hover, .word:active, .word.active {
+      color: var(--accent-text);
+      background: var(--accent-soft);
+    }
+    .word.active {
+      font-weight: 900;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(18px);
+      padding: 11px 15px;
+      border-radius: 999px;
+      background: var(--toast);
+      color: var(--toast-fg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 80;
+      font-weight: 800;
+      max-width: calc(100vw - 24px);
+      text-align: center;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @media (max-width: 620px) {
+      .wrap { padding: 10px 10px 30px; }
+      .top { border-radius: 18px; }
+      .top-row { align-items: start; }
+      .line {
+        grid-template-columns: 1fr;
+        gap: 9px;
+        padding: 12px;
+      }
+      .play {
+        width: 100%;
+        height: 40px;
+        border-radius: 14px;
+      }
+      .english { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="top-row">
+        <a class="back" href="index.html" title="Назад">←</a>
+        <div>
+          <h1>Открытое окно и документы</h1>
+          <div class="sub">Одна страница, три варианта разговора. Нажми на слово для перевода и звука.</div>
+        </div>
+        <button class="theme" type="button" id="themeBtn" title="Тема">☼</button>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Варианты скрипта"></nav>
+      <div class="peek" id="wordPeek"><b>Нажми на английское слово</b><span>здесь появится перевод на русский</span></div>
+    </header>
+
+    <main class="script" id="script"></main>
+  </div>
+
+  <div class="toast" id="toast">Audio not found</div>
+
+  <script src="words.js"></script>
+  <script src="words_extra.js"></script>
+  <script src="window_documents_scripts.js"></script>
+</body>
+</html>
